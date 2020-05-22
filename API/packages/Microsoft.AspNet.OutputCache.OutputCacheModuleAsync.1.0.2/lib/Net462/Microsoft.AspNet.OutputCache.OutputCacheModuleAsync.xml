@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.AspNet.OutputCache.OutputCacheModuleAsync</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.AspNet.OutputCache.ICacheDependencyHandler">
+            <summary>
+            This interface is for the async outputCache providers to implement if they want to support Cache Dependencies 
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.OutputCache.ICacheDependencyHandler.AddAsync(System.String,System.Object,System.Runtime.Caching.CacheItemPolicy)">
+            <summary>
+            Async Add method that takes cacheItemPolicy as parameter
+            </summary>
+            <param name="key"></param>
+            <param name="entry"></param>
+            <param name="cacheItemPolicy"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.AspNet.OutputCache.ICacheDependencyHandler.SetAsync(System.String,System.Object,System.Runtime.Caching.CacheItemPolicy)">
+            <summary>
+            Async Set method that takes cacheItemPolicy as parameter
+            </summary>
+            <param name="key"></param>
+            <param name="entry"></param>
+            <param name="cacheItemPolicy"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.AspNet.OutputCache.OutputCacheFileResponseElement.#ctor(System.String,System.Int64,System.Int64)">
+            <summary>
+            
+            </summary>
+            <param name="path"></param>
+            <param name="offset"></param>
+            <param name="length"></param>
+        </member>
+        <member name="M:Microsoft.AspNet.OutputCache.OutputCacheFileResponseElement.#ctor(System.String,System.Int64,System.Int64,System.Boolean,System.Boolean)">
+            <summary>
+            
+            </summary>
+            <param name="path"></param>
+            <param name="offset"></param>
+            <param name="length"></param>
+            <param name="isImpersonating"></param>
+            <param name="supportsLongTransmitFile"></param>
+        </member>
+        <member name="P:Microsoft.AspNet.OutputCache.OutputCacheFileResponseElement.IsImpersonating">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.OutputCache.OutputCacheFileResponseElement.SupportsLongTransmitFile">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.OutputCache.OutputCacheModuleAsync">
+            <summary>
+            OutputCache Async Module, this Module is able to use Async type of OutputCache Providers 
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.OutputCache.OutputCacheModuleAsync.Dispose">
+            <summary>
+            Implement the IHTTPModule interface
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.OutputCache.RemovedCallback">
+            <summary>
+            This class convert System.Web.Caching.CacheItemRemovedCallback into format of System.Runtime.Caching.CacheEntryRemovedCallback
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.OutputCache.Resource.SR">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.OutputCache.Resource.SR.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.OutputCache.Resource.SR.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.OutputCache.Resource.SR.Cannot_get_snapshot_if_not_buffered">
+            <summary>
+              Looks up a localized string similar to Cannot get snapshot if not buffered..
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.OutputCache.Resource.SR.Cannot_use_snapshot_after_headers_sent">
+            <summary>
+              Looks up a localized string similar to Cannot use snapshot after headers sent..
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.OutputCache.Resource.SR.No_UniqueId_Cache_Dependency">
+            <summary>
+              Looks up a localized string similar to No UniqueId Cache Dependency.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.OutputCache.Resource.SR.Provider_does_not_support_policy_for_responses">
+            <summary>
+              Looks up a localized string similar to Provider does not support policy for responses..
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.OutputCache.Resource.SR.The_provided_IAsyncResult_is_invalid">
+            <summary>
+              Looks up a localized string similar to The provided {0} is invalid..
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.OutputCache.TaskAsyncHelper.BeginTask(System.Func{System.Threading.Tasks.Task},System.AsyncCallback,System.Object)">
+            Assists in converting an method written using the Task Asynchronous Pattern to a Begin/End method pair 
+        </member>
+        <member name="M:Microsoft.AspNet.OutputCache.CryptoUtil.ComputeHash(System.Byte[])">
+            <summary>
+            Computes the SHA256 hash of a given input.
+            </summary>
+            <param Name="input">The input over which to compute the hash.</param>
+            <param name="input"></param>
+            <returns>The binary hash (32 bytes) of the input.</returns>
+        </member>
+        <member name="M:Microsoft.AspNet.OutputCache.CryptoUtil.ComputeHash(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Computes the SHA256 hash of a given segment in a buffer.
+            </summary>
+            <param Name="buffer">The buffer over which to compute the hash.</param>
+            <param Name="offset">The offset at which to begin computing the hash.</param>
+            <param Name="count">The number of bytes in the buffer to include in the hash.</param>
+            <param name="buffer"></param>
+            <param name="offset"></param>
+            <param name="count"></param>
+            <returns>The binary hash (32 bytes) of the buffer segment.</returns>
+        </member>
+    </members>
+</doc>
