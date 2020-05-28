@@ -53,10 +53,12 @@ namespace SFB.Web.Api.Controllers
 
         private async Task<SelfAssesmentModel> BuildSelfAssesmentModel(int urn, EstablishmentType financeType)
         {
-            var schoolFinancialData = await _financialDataService.GetSchoolFinancialDataObjectAsync(urn, financeType, CentralFinancingType.Include);
-            var model = new SelfAssesmentModel(urn, schoolFinancialData.SchoolName, schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form));
             string termYears = await GetTermYears(financeType);
+            var schoolFinancialData = await _financialDataService.GetSchoolFinancialDataObjectAsync(urn, financeType, CentralFinancingType.Include);
+            var model = new SelfAssesmentModel(urn, schoolFinancialData.SchoolName, schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), termYears);
+            
             model.SadSizeLookup = await _selfAssesmentDashboardDataService.GetSADSizeLookupDataObject(schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.NoPupils.GetValueOrDefault(), termYears);
+            
             model.SadFSMLookup = await _selfAssesmentDashboardDataService.GetSADFSMLookupDataObject(schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.PercentageFSM.GetValueOrDefault(), termYears);
 
             model.SadAssesmentAreas = new List<SadAssesmentAreaModel>();
