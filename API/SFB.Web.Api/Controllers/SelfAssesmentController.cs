@@ -55,7 +55,15 @@ namespace SFB.Web.Api.Controllers
         {
             string termYears = await GetTermYears(financeType);
             var schoolFinancialData = await _financialDataService.GetSchoolFinancialDataObjectAsync(urn, financeType, CentralFinancingType.Include);
-            var model = new SelfAssesmentModel(urn, schoolFinancialData.SchoolName, schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), termYears);
+            var model = new SelfAssesmentModel(
+                urn, 
+                schoolFinancialData.SchoolName, 
+                schoolFinancialData.OverallPhase, 
+                schoolFinancialData.LondonWeight, 
+                schoolFinancialData.NoPupils.GetValueOrDefault(), 
+                schoolFinancialData.PercentageFSM.GetValueOrDefault(), 
+                bool.Parse(schoolFinancialData.Has6Form), 
+                termYears);
             
             model.SadSizeLookup = await _selfAssesmentDashboardDataService.GetSADSizeLookupDataObject(schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.NoPupils.GetValueOrDefault(), termYears);
             
