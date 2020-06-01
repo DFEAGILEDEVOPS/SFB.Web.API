@@ -6,6 +6,7 @@ using SFB.Web.ApplicationCore.Models;
 using SFB.Web.ApplicationCore.Services.DataAccess;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SFB.Web.Api.Controllers
@@ -79,6 +80,7 @@ namespace SFB.Web.Api.Controllers
         private async Task AddAssessmentArea(string areaName, EstablishmentType financeType, decimal schoolData, decimal total, SchoolTrustFinancialDataObject schoolFinancialData, SelfAssesmentModel model, string termYears)
         {
             List<SADSchoolRatingsDataObject> teachingStaffTresholds = await _selfAssesmentDashboardDataService.GetSADSchoolRatingsDataObjectAsync(areaName, financeType, schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.LondonWeight, model.SadSizeLookup.SizeType, model.SadFSMLookup.FSMScale, schoolData / total, termYears);
+            teachingStaffTresholds = teachingStaffTresholds.OrderBy(t => t.ScoreLow).ToList();
             model.SadAssesmentAreas.Add(new SadAssesmentAreaModel(areaName, schoolData, schoolData / total, teachingStaffTresholds));
         }
 
