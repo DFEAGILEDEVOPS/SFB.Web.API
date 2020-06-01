@@ -73,6 +73,7 @@ namespace SFB.Web.Api.Controllers
             model.SadAssesmentAreas = new List<SadAssesmentAreaModel>();
 
             await AddAssessmentArea("Teaching staff", financeType, schoolFinancialData.TeachingStaff.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Supply staff", financeType, schoolFinancialData.TeachingStaff.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
 
             return model;
         }
