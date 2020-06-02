@@ -72,23 +72,26 @@ namespace SFB.Web.Api.Controllers
 
             model.SadAssesmentAreas = new List<SadAssesmentAreaModel>();
 
-            await AddAssessmentArea("Teaching staff", financeType, schoolFinancialData.TeachingStaff.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            await AddAssessmentArea("Supply staff", financeType, schoolFinancialData.SupplyStaff.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            await AddAssessmentArea("Education support staff", financeType, schoolFinancialData.EducationSupportStaff.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            await AddAssessmentArea("Administrative and clerical staff", financeType, schoolFinancialData.AdministrativeClericalStaff.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            await AddAssessmentArea("Other staff costs", financeType, schoolFinancialData.OtherStaffCosts.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            await AddAssessmentArea("Premises costs", financeType, schoolFinancialData.Premises.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            await AddAssessmentArea("Teaching resources", financeType, schoolFinancialData.EducationalSupplies.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            await AddAssessmentArea("Energy", financeType, schoolFinancialData.Energy.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Spending", "Teaching staff", financeType, schoolFinancialData.TeachingStaff.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Spending", "Supply staff", financeType, schoolFinancialData.SupplyStaff.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Spending", "Education support staff", financeType, schoolFinancialData.EducationSupportStaff.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Spending", "Administrative and clerical staff", financeType, schoolFinancialData.AdministrativeClericalStaff.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Spending", "Other staff costs", financeType, schoolFinancialData.OtherStaffCosts.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Spending", "Premises costs", financeType, schoolFinancialData.Premises.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Spending", "Teaching resources", financeType, schoolFinancialData.EducationalSupplies.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Spending", "Energy", financeType, schoolFinancialData.Energy.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            
+            await AddAssessmentArea("Reserve and balance", "In-year balance", financeType, schoolFinancialData.InYearBalance.GetValueOrDefault(), schoolFinancialData.TotalIncome.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Reserve and balance", "Revenue reserve", financeType, schoolFinancialData.RevenueReserve.GetValueOrDefault(), schoolFinancialData.TotalIncome.GetValueOrDefault(), schoolFinancialData, model, termYears);
 
             return model;
         }
 
-        private async Task AddAssessmentArea(string areaName, EstablishmentType financeType, decimal schoolData, decimal total, SchoolTrustFinancialDataObject schoolFinancialData, SelfAssesmentModel model, string termYears)
+        private async Task AddAssessmentArea(string areaType, string areaName, EstablishmentType financeType, decimal schoolData, decimal total, SchoolTrustFinancialDataObject schoolFinancialData, SelfAssesmentModel model, string termYears)
         {
-            List<SADSchoolRatingsDataObject> teachingStaffTresholds = await _selfAssesmentDashboardDataService.GetSADSchoolRatingsDataObjectAsync(areaName, financeType, schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.LondonWeight, model.SadSizeLookup.SizeType, model.SadFSMLookup.FSMScale, schoolData / total, termYears);
+            List<SADSchoolRatingsDataObject> teachingStaffTresholds = await _selfAssesmentDashboardDataService.GetSADSchoolRatingsDataObjectAsync(areaName, financeType, schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.LondonWeight, model.SadSizeLookup?.SizeType, model.SadFSMLookup?.FSMScale, schoolData / total, termYears);
             teachingStaffTresholds = teachingStaffTresholds.OrderBy(t => t.ScoreLow).ToList();
-            model.SadAssesmentAreas.Add(new SadAssesmentAreaModel(areaName, schoolData, schoolData / total, teachingStaffTresholds));
+            model.SadAssesmentAreas.Add(new SadAssesmentAreaModel(areaType, areaName, schoolData, schoolData / total, teachingStaffTresholds));
         }
 
         private async Task<string> GetTermYears(EstablishmentType financeType)
