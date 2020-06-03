@@ -42,7 +42,7 @@ namespace SFB.Web.Api.Controllers
                 var schoolContextData = await _contextDataService.GetSchoolDataObjectByUrnAsync(urn);//TODO: Do we need all the context data?
                 var financeType = (EstablishmentType)Enum.Parse(typeof(EstablishmentType), schoolContextData.FinanceType);
 
-                selfAssesmentModel = await BuildSelfAssesmentModel(urn, financeType);
+                selfAssesmentModel = await BuildSelfAssesmentModel(urn, financeType, schoolContextData.OfstedRating, schoolContextData.OfstedLastInsp);
             }
             catch (Exception ex)
             {
@@ -52,7 +52,7 @@ namespace SFB.Web.Api.Controllers
             return selfAssesmentModel;
         }
 
-        private async Task<SelfAssesmentModel> BuildSelfAssesmentModel(int urn, EstablishmentType financeType)
+        private async Task<SelfAssesmentModel> BuildSelfAssesmentModel(int urn, EstablishmentType financeType, string ofstedRating, string ofstedLastInsp)
         {
             string termYears = await GetTermYears(financeType);
             var schoolFinancialData = await _financialDataService.GetSchoolFinancialDataObjectAsync(urn, financeType, CentralFinancingType.Include);
@@ -62,7 +62,12 @@ namespace SFB.Web.Api.Controllers
                 schoolFinancialData.OverallPhase, 
                 schoolFinancialData.LondonWeight, 
                 schoolFinancialData.NoPupils.GetValueOrDefault(), 
-                schoolFinancialData.PercentageFSM.GetValueOrDefault(), 
+                schoolFinancialData.PercentageFSM.GetValueOrDefault(),
+                ofstedRating,
+                ofstedLastInsp,
+                schoolFinancialData.OverallPhase == "Secondary" || schoolFinancialData.OverallPhase =="All-through" ? schoolFinancialData.Progress8Measure.GetValueOrDefault() : schoolFinancialData.Ks2Progress.GetValueOrDefault(),
+                schoolFinancialData.OverallPhase == "Secondary" || schoolFinancialData.OverallPhase == "All-through" ? "Progress 8 score" : "KS2 score",
+                schoolFinancialData.Progress8Banding.GetValueOrDefault(),
                 bool.Parse(schoolFinancialData.Has6Form), 
                 termYears);
             
