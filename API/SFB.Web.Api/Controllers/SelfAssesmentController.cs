@@ -61,14 +61,16 @@ namespace SFB.Web.Api.Controllers
                 schoolFinancialData.SchoolName, 
                 schoolFinancialData.OverallPhase, 
                 schoolFinancialData.LondonWeight, 
-                schoolFinancialData.NoPupils.GetValueOrDefault(), 
+                schoolFinancialData.NoPupils.GetValueOrDefault(),
                 schoolFinancialData.PercentageFSM.GetValueOrDefault(),
                 ofstedRating,
                 ofstedLastInsp,
                 schoolFinancialData.OverallPhase == "Secondary" || schoolFinancialData.OverallPhase =="All-through" ? schoolFinancialData.Progress8Measure.GetValueOrDefault() : schoolFinancialData.Ks2Progress.GetValueOrDefault(),
                 schoolFinancialData.OverallPhase == "Secondary" || schoolFinancialData.OverallPhase == "All-through" ? "Progress 8 score" : "KS2 score",
                 schoolFinancialData.Progress8Banding.GetValueOrDefault(),
-                bool.Parse(schoolFinancialData.Has6Form), 
+                bool.Parse(schoolFinancialData.Has6Form),
+                schoolFinancialData.TotalExpenditure.GetValueOrDefault(),
+                schoolFinancialData.TotalIncome.GetValueOrDefault(),
                 termYears);
             
             model.SadSizeLookup = await _selfAssesmentDashboardDataService.GetSADSizeLookupDataObject(schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.NoPupils.GetValueOrDefault(), termYears);
