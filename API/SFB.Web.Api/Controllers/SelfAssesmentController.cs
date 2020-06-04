@@ -63,11 +63,16 @@ namespace SFB.Web.Api.Controllers
                 schoolFinancialData.LondonWeight, 
                 schoolFinancialData.NoPupils.GetValueOrDefault(), 
                 schoolFinancialData.PercentageFSM.GetValueOrDefault(),
-                ofstedRating,
-                ofstedLastInsp,
-                schoolFinancialData.OverallPhase == "Secondary" || schoolFinancialData.OverallPhase =="All-through" ? schoolFinancialData.Progress8Measure.GetValueOrDefault() : schoolFinancialData.Ks2Progress.GetValueOrDefault(),
-                schoolFinancialData.OverallPhase == "Secondary" || schoolFinancialData.OverallPhase == "All-through" ? "Progress 8 score" : "KS2 score",
-                schoolFinancialData.Progress8Banding.GetValueOrDefault(),
+                "1",
+                "2018-03-07T00:00:00",
+                0.83m,
+                "KS2 score",
+                0,
+                //ofstedRating,
+                //ofstedLastInsp,
+                //schoolFinancialData.OverallPhase == "Secondary" || schoolFinancialData.OverallPhase =="All-through" ? schoolFinancialData.Progress8Measure.GetValueOrDefault() : schoolFinancialData.Ks2Progress.GetValueOrDefault(),
+                //schoolFinancialData.OverallPhase == "Secondary" || schoolFinancialData.OverallPhase == "All-through" ? "Progress 8 score" : "KS2 score",
+                //schoolFinancialData.Progress8Banding.GetValueOrDefault(),
                 bool.Parse(schoolFinancialData.Has6Form), 
                 termYears);
             
@@ -89,10 +94,10 @@ namespace SFB.Web.Api.Controllers
             await AddAssessmentArea("Reserve and balance", "In-year balance", financeType, schoolFinancialData.InYearBalance.GetValueOrDefault(), schoolFinancialData.TotalIncome.GetValueOrDefault(), schoolFinancialData, model, termYears);
             await AddAssessmentArea("Reserve and balance", "Revenue reserve", financeType, schoolFinancialData.RevenueReserve.GetValueOrDefault(), schoolFinancialData.TotalIncome.GetValueOrDefault(), schoolFinancialData, model, termYears);
             
-            //await AddAssessmentArea("School characteristics", "Average teacher cost", financeType, schoolFinancialData.TeachingStaff.GetValueOrDefault(), schoolFinancialData.NumberTeachersHeadcount.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            //await AddAssessmentArea("School characteristics", "Senior leaders as a percentage of workforce", financeType, schoolFinancialData.TeachersLeader.GetValueOrDefault(), schoolFinancialData.WorkforceTotal.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            //await AddAssessmentArea("School characteristics", "Pupil to teacher ratio", financeType, schoolFinancialData.NoPupils.GetValueOrDefault(), schoolFinancialData.TeachersTotal.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            //await AddAssessmentArea("School characteristics", "Pupil to adult ratio", financeType, schoolFinancialData.NoPupils.GetValueOrDefault(), schoolFinancialData.WorkforceTotal.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("School characteristics", "Average teacher cost", financeType, schoolFinancialData.TeachingStaff.GetValueOrDefault(), schoolFinancialData.NumberTeachersHeadcount.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("School characteristics", "Senior leaders as a percentage of workforce", financeType, schoolFinancialData.TeachersLeader.GetValueOrDefault(), schoolFinancialData.WorkforceTotal.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("School characteristics", "Pupil to teacher ratio", financeType, schoolFinancialData.NoPupils.GetValueOrDefault(), schoolFinancialData.TeachersTotal.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("School characteristics", "Pupil to adult ratio", financeType, schoolFinancialData.NoPupils.GetValueOrDefault(), schoolFinancialData.WorkforceTotal.GetValueOrDefault(), schoolFinancialData, model, termYears);
 
             return model;
         }
