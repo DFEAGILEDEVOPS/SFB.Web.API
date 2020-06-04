@@ -39,7 +39,7 @@ namespace SFB.Web.Api.Controllers
 
             //try
             //{
-                var schoolContextData = await _contextDataService.GetSchoolDataObjectByUrnAsync(urn);//TODO: Do we need all the context data?
+                var schoolContextData = await _contextDataService.GetSchoolDataObjectByUrnAsync(urn);
                 var financeType = (EstablishmentType)Enum.Parse(typeof(EstablishmentType), schoolContextData.FinanceType);
 
                 selfAssesmentModel = await BuildSelfAssesmentModel(urn, financeType, schoolContextData.OfstedRating, schoolContextData.OfstedLastInsp);
