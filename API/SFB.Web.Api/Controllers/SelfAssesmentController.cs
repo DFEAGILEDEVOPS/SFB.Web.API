@@ -6,6 +6,7 @@ using SFB.Web.ApplicationCore.Models;
 using SFB.Web.ApplicationCore.Services.DataAccess;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -64,7 +65,7 @@ namespace SFB.Web.Api.Controllers
                 schoolFinancialData.NoPupils.GetValueOrDefault(),
                 schoolFinancialData.PercentageFSM.GetValueOrDefault(),
                 ofstedRating,
-                DateTime.Parse(ofstedLastInsp),
+                DateTime.ParseExact(ofstedLastInsp, "dd/MM/yyyy", CultureInfo.InvariantCulture),
                 schoolFinancialData.OverallPhase == "Secondary" || schoolFinancialData.OverallPhase =="All-through" ? schoolFinancialData.Progress8Measure.GetValueOrDefault() : schoolFinancialData.Ks2Progress.GetValueOrDefault(),
                 schoolFinancialData.OverallPhase == "Secondary" || schoolFinancialData.OverallPhase == "All-through" ? "Progress 8 score" : "KS2 score",
                 schoolFinancialData.Progress8Banding.GetValueOrDefault(),
