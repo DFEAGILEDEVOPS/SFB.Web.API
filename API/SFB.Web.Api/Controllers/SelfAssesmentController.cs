@@ -102,9 +102,10 @@ namespace SFB.Web.Api.Controllers
 
         private async Task AddAssessmentArea(string areaType, string areaName, decimal schoolData, decimal total, SchoolTrustFinancialDataObject schoolFinancialData, SelfAssesmentModel model, string termYears)
         {
-            List<SADSchoolRatingsDataObject> ratings = await _selfAssesmentDashboardDataService.GetSADSchoolRatingsDataObjectAsync(areaName, schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.LondonWeight, model.SadSizeLookup?.SizeType, model.SadFSMLookup?.FSMScale, schoolData / total, termYears);
+            var percentageSchoolData = decimal.Round(schoolData / total, 2, MidpointRounding.AwayFromZero);
+            List<SADSchoolRatingsDataObject> ratings = await _selfAssesmentDashboardDataService.GetSADSchoolRatingsDataObjectAsync(areaName, schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.LondonWeight, model.SadSizeLookup?.SizeType, model.SadFSMLookup?.FSMScale, percentageSchoolData, termYears);
             ratings = ratings.OrderBy(t => t.ScoreLow).ToList();
-            model.SadAssesmentAreas.Add(new SadAssesmentAreaModel(areaType, areaName, schoolData, schoolData / total, ratings));
+            model.SadAssesmentAreas.Add(new SadAssesmentAreaModel(areaType, areaName, schoolData, percentageSchoolData, ratings));
         }
 
         private async Task<string> GetTermYears(EstablishmentType financeType)
