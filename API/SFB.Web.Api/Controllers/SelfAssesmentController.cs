@@ -100,12 +100,11 @@ namespace SFB.Web.Api.Controllers
             return model;
         }
 
-        private async Task AddAssessmentArea(string areaType, string areaName, decimal schoolData, decimal total, SchoolTrustFinancialDataObject schoolFinancialData, SelfAssesmentModel model, string termYears)
-        {
-            var percentageSchoolData = decimal.Round(schoolData / total, 2, MidpointRounding.AwayFromZero);
-            List<SADSchoolRatingsDataObject> ratings = await _selfAssesmentDashboardDataService.GetSADSchoolRatingsDataObjectAsync(areaName, schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.LondonWeight, model.SadSizeLookup?.SizeType, model.SadFSMLookup?.FSMScale, percentageSchoolData, termYears);
+        private async Task AddAssessmentArea(string areaType, string areaName, decimal schoolData, decimal totalForAreaType, SchoolTrustFinancialDataObject schoolFinancialData, SelfAssesmentModel model, string termYears)
+        {            
+            List<SADSchoolRatingsDataObject> ratings = await _selfAssesmentDashboardDataService.GetSADSchoolRatingsDataObjectAsync(areaName, schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.LondonWeight, model.SadSizeLookup?.SizeType, model.SadFSMLookup?.FSMScale, termYears);
             ratings = ratings.OrderBy(t => t.ScoreLow).ToList();
-            model.SadAssesmentAreas.Add(new SadAssesmentAreaModel(areaType, areaName, schoolData, percentageSchoolData, ratings));
+            model.SadAssesmentAreas.Add(new SadAssesmentAreaModel(areaType, areaName, schoolData, totalForAreaType, ratings));
         }
 
         private async Task<string> GetTermYears(EstablishmentType financeType)
