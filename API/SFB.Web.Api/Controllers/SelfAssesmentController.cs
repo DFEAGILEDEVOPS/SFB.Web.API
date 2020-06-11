@@ -65,7 +65,7 @@ namespace SFB.Web.Api.Controllers
                 schoolFinancialData.NoPupils.GetValueOrDefault(),
                 schoolFinancialData.PercentageFSM.GetValueOrDefault(),
                 ofstedRating,
-                DateTime.ParseExact(ofstedLastInsp, "dd/MM/yyyy", CultureInfo.InvariantCulture),
+                ofstedLastInsp == null ? (DateTime?)null : DateTime.ParseExact(ofstedLastInsp, "dd/MM/yyyy", CultureInfo.InvariantCulture),
                 schoolFinancialData.OverallPhase == "Secondary" || schoolFinancialData.OverallPhase =="All-through" ? schoolFinancialData.Progress8Measure.GetValueOrDefault() : schoolFinancialData.Ks2Progress.GetValueOrDefault(),
                 schoolFinancialData.OverallPhase == "Secondary" || schoolFinancialData.OverallPhase == "All-through" ? "Progress 8 score" : "KS2 score",
                 schoolFinancialData.Progress8Banding.GetValueOrDefault(),
