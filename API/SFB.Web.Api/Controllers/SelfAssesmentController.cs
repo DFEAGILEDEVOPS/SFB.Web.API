@@ -100,11 +100,14 @@ namespace SFB.Web.Api.Controllers
             await AddAssessmentArea("School characteristics", "Pupil to teacher ratio", pupilToTeacherRatio, 1, schoolFinancialData, model, termYears);
             var pupilToAdultRatio = Math.Round(schoolFinancialData.NoPupils.GetValueOrDefault() / schoolFinancialData.WorkforceTotal.GetValueOrDefault(), 2);
             await AddAssessmentArea("School characteristics", "Pupil to adult ratio", pupilToAdultRatio, 1, schoolFinancialData, model, termYears);
+            await AddAssessmentArea("School characteristics", "Teacher contact ratio (less than 1)", null, 1, schoolFinancialData, model, termYears);
+            await AddAssessmentArea("School characteristics", "Predicted percentage pupil number change in 3-5 years", null, 1, schoolFinancialData, model, termYears);
+            await AddAssessmentArea("School characteristics", "Average Class size", null, 1, schoolFinancialData, model, termYears);
 
             return model;
         }
 
-        private async Task AddAssessmentArea(string areaType, string areaName, decimal schoolData, decimal totalForAreaType, SchoolTrustFinancialDataObject schoolFinancialData, SelfAssesmentModel model, string termYears)
+        private async Task AddAssessmentArea(string areaType, string areaName, decimal? schoolData, decimal totalForAreaType, SchoolTrustFinancialDataObject schoolFinancialData, SelfAssesmentModel model, string termYears)
         {            
             List<SADSchoolRatingsDataObject> ratings = await _selfAssesmentDashboardDataService.GetSADSchoolRatingsDataObjectAsync(areaName, schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.LondonWeight, model.SadSizeLookup?.SizeType, model.SadFSMLookup?.FSMScale, termYears);
             ratings = ratings.OrderBy(t => t.ScoreLow).ToList();
