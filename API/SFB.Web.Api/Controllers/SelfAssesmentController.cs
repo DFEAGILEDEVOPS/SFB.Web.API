@@ -91,11 +91,15 @@ namespace SFB.Web.Api.Controllers
             
             await AddAssessmentArea("Reserve and balance", "In-year balance", schoolFinancialData.InYearBalance.GetValueOrDefault(), schoolFinancialData.TotalIncome.GetValueOrDefault(), schoolFinancialData, model, termYears);
             await AddAssessmentArea("Reserve and balance", "Revenue reserve", schoolFinancialData.RevenueReserve.GetValueOrDefault(), schoolFinancialData.TotalIncome.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            
-            await AddAssessmentArea("School characteristics", "Average teacher cost", schoolFinancialData.TeachingStaff.GetValueOrDefault(), schoolFinancialData.NumberTeachersHeadcount.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            await AddAssessmentArea("School characteristics", "Senior leaders as a percentage of workforce", schoolFinancialData.TeachersLeader.GetValueOrDefault(), schoolFinancialData.WorkforceTotal.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            await AddAssessmentArea("School characteristics", "Pupil to teacher ratio", schoolFinancialData.NoPupils.GetValueOrDefault(), schoolFinancialData.TeachersTotal.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            await AddAssessmentArea("School characteristics", "Pupil to adult ratio", schoolFinancialData.NoPupils.GetValueOrDefault(), schoolFinancialData.WorkforceTotal.GetValueOrDefault(), schoolFinancialData, model, termYears);
+
+            var averageTeacherCost = Math.Round(schoolFinancialData.TeachingStaff.GetValueOrDefault() / schoolFinancialData.TeachersTotal.GetValueOrDefault(), 2);
+            await AddAssessmentArea("School characteristics", "Average teacher cost", averageTeacherCost, 1, schoolFinancialData, model, termYears);
+            var seniorLeadersAsAPercentageOfWorkforce = Math.Round(schoolFinancialData.TeachersLeader.GetValueOrDefault() / schoolFinancialData.WorkforceTotal.GetValueOrDefault(), 2);
+            await AddAssessmentArea("School characteristics", "Senior leaders as a percentage of workforce", seniorLeadersAsAPercentageOfWorkforce, 1, schoolFinancialData, model, termYears);
+            var pupilToTeacherRatio = Math.Round(schoolFinancialData.NoPupils.GetValueOrDefault() / schoolFinancialData.TeachersTotal.GetValueOrDefault(), 2);
+            await AddAssessmentArea("School characteristics", "Pupil to teacher ratio", pupilToTeacherRatio, 1, schoolFinancialData, model, termYears);
+            var pupilToAdultRatio = Math.Round(schoolFinancialData.NoPupils.GetValueOrDefault() / schoolFinancialData.WorkforceTotal.GetValueOrDefault(), 2);
+            await AddAssessmentArea("School characteristics", "Pupil to adult ratio", pupilToAdultRatio, 1, schoolFinancialData, model, termYears);
 
             return model;
         }
