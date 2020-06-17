@@ -14,18 +14,18 @@ namespace SFB.Web.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SelfAssesmentController : ControllerBase
+    public class SelfAssessmentController : ControllerBase
     {
         private readonly ISelfAssesmentDashboardDataService _selfAssesmentDashboardDataService;
         private readonly IFinancialDataService _financialDataService;
         private readonly IContextDataService _contextDataService;
         private readonly ILogger _logger;
 
-        public SelfAssesmentController(
+        public SelfAssessmentController(
            ISelfAssesmentDashboardDataService selfAssesmentDashboardDataService, 
            IFinancialDataService financialDataService,
            IContextDataService contextDataService,
-           ILogger<SelfAssesmentController> logger)
+           ILogger<SelfAssessmentController> logger)
         {
             _selfAssesmentDashboardDataService = selfAssesmentDashboardDataService;
             _financialDataService = financialDataService;
