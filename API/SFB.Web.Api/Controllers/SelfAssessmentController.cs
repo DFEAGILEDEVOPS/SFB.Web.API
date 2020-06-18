@@ -61,6 +61,7 @@ namespace SFB.Web.Api.Controllers
                 urn, 
                 schoolFinancialData.SchoolName, 
                 schoolFinancialData.OverallPhase, 
+                financeType.ToString(),
                 schoolFinancialData.LondonWeight, 
                 schoolFinancialData.NoPupils.GetValueOrDefault(),
                 schoolFinancialData.PercentageFSM.GetValueOrDefault(),
