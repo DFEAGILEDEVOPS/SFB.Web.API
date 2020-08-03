@@ -76,7 +76,8 @@ namespace SFB.Web.Api.Controllers
                 termYears,
                 schoolFinancialData.TeachersTotal.GetValueOrDefault(),
                 schoolFinancialData.TeachersLeader.GetValueOrDefault(),
-                schoolFinancialData.WorkforceTotal.GetValueOrDefault()
+                schoolFinancialData.WorkforceTotal.GetValueOrDefault(),
+                schoolFinancialData.PeriodCoveredByReturn >= 12
                 );
             
             model.SadSizeLookup = await _selfAssesmentDashboardDataService.GetSADSizeLookupDataObject(schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.NoPupils.GetValueOrDefault(), termYears);
