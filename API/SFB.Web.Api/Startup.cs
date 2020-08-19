@@ -88,10 +88,11 @@ namespace SFB.Web.Api
 
             app.Use(async (context, next) =>
             {
-                context.Response.Headers.Add("X-Xss-Protection", "1");
+                context.Response.Headers.Add("X-Xss-Protection", "1; mode=block");
                 context.Response.Headers.Add("x-frame-options", "SAMEORIGIN");
                 context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
                 context.Response.Headers.Remove("X-Powered-By");
+                context.Response.Headers.Remove("Server");
                 await next();
             });
 
