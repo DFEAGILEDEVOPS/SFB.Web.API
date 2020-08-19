@@ -10,6 +10,7 @@ using SFB.Web.ApplicationCore.Services.DataAccess;
 using SFB.Web.Infrastructure.Helpers;
 using SFB.Web.Infrastructure.Logging;
 using SFB.Web.Infrastructure.Repositories;
+using System;
 
 namespace SFB.Web.Api
 {
@@ -59,6 +60,13 @@ namespace SFB.Web.Api
             });
 
             services.AddControllers();
+
+            services.AddHsts(options =>
+            {
+                options.Preload = true;
+                options.IncludeSubDomains = true;
+                options.MaxAge = TimeSpan.FromDays(365);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -71,6 +79,7 @@ namespace SFB.Web.Api
             else
             {
                 app.UseExceptionHandler("/error");
+                app.UseHsts();
             }
 
             app.UseHttpsRedirection();
