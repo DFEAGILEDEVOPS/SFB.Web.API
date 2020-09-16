@@ -20,7 +20,7 @@
     "SFB.Web.Api": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "api/selfassessment/125271",
+      "launchUrl": "api/efficiencymetric/102975",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
