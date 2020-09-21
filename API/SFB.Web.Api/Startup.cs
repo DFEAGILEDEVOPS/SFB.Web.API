@@ -44,7 +44,7 @@ namespace SFB.Web.Api
             services.AddSingleton<IFinancialDataService, FinancialDataService>();
             services.AddSingleton<IFinancialDataRepository>(container => new CosmosDbFinancialDataRepository(dataCollectionManager, cosmosClient, databaseId, container.GetRequiredService<ILogManager>()));
             services.AddSingleton<IEdubaseRepository>(container => new CosmosDbEdubaseRepository(dataCollectionManager, cosmosClient, databaseId, container.GetRequiredService<ILogManager>()));
-            services.AddSingleton<IEfficiencyMetricRepository>(container => new EfficiencyMetricRepository(cosmosClient, databaseId, container.GetRequiredService<ILogManager>()));
+            services.AddSingleton<IEfficiencyMetricRepository>(container => new CosmosDBEfficiencyMetricRepository(cosmosClient, databaseId, container.GetRequiredService<ILogManager>()));
             services.AddSingleton<ISelfAssesmentDashboardRepository>(container => new CosmosDBSelfAssesmentDashboardRepository(cosmosClient, databaseId, container.GetRequiredService<ILogManager>()));
             services.AddSingleton<IDataCollectionManager>(dataCollectionManager);
 
