@@ -15,19 +15,14 @@ namespace SFB.Web.Api.Controllers
     public class EfficiencyMetricController : ControllerBase
     {
         private readonly IEfficiencyMetricDataService _efficiencyMetricDataService;
-        private readonly IContextDataService _contextDataService;
-
         private readonly ILogger _logger;
 
         public EfficiencyMetricController(IContextDataService contextDataService, 
             IEfficiencyMetricDataService efficiencyMetricDataService,
             ILogger<EfficiencyMetricController> logger)
         {
-            _contextDataService = contextDataService;
             _efficiencyMetricDataService = efficiencyMetricDataService;
-
             _logger = logger;
-
         }
 
         // GET api/efficiencymetric/138082
@@ -53,6 +48,22 @@ namespace SFB.Web.Api.Controllers
             else
             {
                 return new EfficiencyMetricParentModel(defaultSchoolEMData);
+            }
+        }
+
+        // HEAD api/efficiencymetric/138082
+        [HttpHead("{urn}")]
+        public async Task<StatusCodeResult> HeadAsync(int urn)
+        {
+            try
+            {
+                var doesEmExist = await _efficiencyMetricDataService.GetStatusByUrn(urn);
+                return doesEmExist ? (StatusCodeResult)new OkResult() : (StatusCodeResult)new NotFoundResult();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return NotFound();
             }
         }
     }
