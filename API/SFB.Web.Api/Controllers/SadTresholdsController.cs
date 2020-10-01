@@ -31,7 +31,7 @@ namespace SFB.Web.Api.Controllers
             var ratings = await _selfAssesmentDashboardDataService.GetSADSchoolRatingsDataObjectAsync(areaName, overallPhase, has6Form, londonWeight, sizeType, fsmScale, termYears);
             ratings = ratings.OrderBy(t => t.ScoreLow).ToList();
 
-            return ratings;
+            return ratings; 
         }
     }
 }
