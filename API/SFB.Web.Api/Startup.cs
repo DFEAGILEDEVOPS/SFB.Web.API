@@ -26,7 +26,7 @@ namespace SFB.Web.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            string endPoint = Configuration.GetValue<string>("Secrets:endpoint");
+            string endPoint = Configuration.GetValue<string>("Secrets:endpoint"); 
             string authKey = Configuration.GetValue<string>("Secrets:authkey");
             string databaseId = Configuration.GetValue<string>("Secrets:database");
             string emCollectionId = Configuration.GetValue<string>("Secrets:emCollection");
