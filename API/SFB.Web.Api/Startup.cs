@@ -30,7 +30,7 @@ namespace SFB.Web.Api
             string authKey = Configuration.GetValue<string>("Secrets:authkey");
             string databaseId = Configuration.GetValue<string>("Secrets:database");
             string emCollectionId = Configuration.GetValue<string>("Secrets:emCollection");
-            string sadCollectionId = Configuration.GetValue<string>("Secrets:sadCollecion");
+            string sadCollectionId = Configuration.GetValue<string>("Secrets:sadCollection");
             string enableAiTelemetry = Configuration.GetValue<string>("ApplicationInsights:enabled");
 
             var cosmosClient = new CosmosClientBuilder(endPoint, authKey)
