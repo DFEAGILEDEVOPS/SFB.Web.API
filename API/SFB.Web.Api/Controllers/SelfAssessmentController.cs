@@ -57,18 +57,20 @@ namespace SFB.Web.Api.Controllers
         {
             string termYears = await GetTermYears(financeType);
             var schoolFinancialData = await _financialDataService.GetSchoolFinancialDataObjectAsync(urn, financeType, CentralFinancingType.Include);
+            var progressScoreType = GetProgressScoreType(schoolFinancialData);
             var model = new SelfAssesmentModel(
-                urn, 
-                schoolFinancialData.SchoolName, 
-                schoolFinancialData.OverallPhase, 
+                urn,
+                schoolFinancialData.SchoolName,
+                schoolFinancialData.OverallPhase,
                 financeType.ToString(),
-                schoolFinancialData.LondonWeight, 
+                schoolFinancialData.LondonWeight,
                 schoolFinancialData.NoPupils.GetValueOrDefault(),
                 schoolFinancialData.PercentageFSM.GetValueOrDefault(),
                 ofstedRating,
                 ofstedLastInsp == null ? (DateTime?)null : DateTime.ParseExact(ofstedLastInsp, "dd/MM/yyyy", CultureInfo.InvariantCulture),
-                schoolFinancialData.OverallPhase == "Secondary" || schoolFinancialData.OverallPhase =="All-through" ? schoolFinancialData.Progress8Measure : schoolFinancialData.Ks2Progress,
-                schoolFinancialData.OverallPhase == "Secondary" || schoolFinancialData.OverallPhase == "All-through" ? "Progress 8 score" : "KS2 score",
+                schoolFinancialData.Progress8Measure,
+                schoolFinancialData.Ks2Progress,
+                progressScoreType,
                 schoolFinancialData.Progress8Banding.GetValueOrDefault(),
                 bool.Parse(schoolFinancialData.Has6Form),
                 schoolFinancialData.TotalExpenditure.GetValueOrDefault(),
@@ -79,9 +81,9 @@ namespace SFB.Web.Api.Controllers
                 schoolFinancialData.WorkforceTotal.GetValueOrDefault(),
                 schoolFinancialData.PeriodCoveredByReturn >= 12
                 );
-            
+
             model.SadSizeLookup = await _selfAssesmentDashboardDataService.GetSADSizeLookupDataObject(schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.NoPupils.GetValueOrDefault(), termYears);
-            
+
             model.SadFSMLookup = await _selfAssesmentDashboardDataService.GetSADFSMLookupDataObject(schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.PercentageFSM.GetValueOrDefault(), termYears);
 
             model.SadAssesmentAreas = new List<SadAssesmentAreaModel>();
@@ -94,10 +96,10 @@ namespace SFB.Web.Api.Controllers
             await AddAssessmentArea("Spending", "Premises costs", schoolFinancialData.Premises.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
             await AddAssessmentArea("Spending", "Educational supplies", schoolFinancialData.EducationalSupplies.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
             await AddAssessmentArea("Spending", "Energy", schoolFinancialData.Energy.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            
+
             await AddAssessmentArea("Reserve and balance", "In-year balance", schoolFinancialData.InYearBalance.GetValueOrDefault(), schoolFinancialData.TotalIncome.GetValueOrDefault(), schoolFinancialData, model, termYears);
             await AddAssessmentArea("Reserve and balance", "Revenue reserve", schoolFinancialData.RevenueReserve.GetValueOrDefault(), schoolFinancialData.TotalIncome.GetValueOrDefault(), schoolFinancialData, model, termYears);
-          
+
             await AddAssessmentArea("School characteristics", "Average teacher cost", null, null, schoolFinancialData, model, termYears);
             await AddAssessmentArea("School characteristics", "Senior leaders as a percentage of workforce", null, null, schoolFinancialData, model, termYears); ; ;
             await AddAssessmentArea("School characteristics", "Pupil to teacher ratio", null, null, schoolFinancialData, model, termYears);
@@ -107,6 +109,29 @@ namespace SFB.Web.Api.Controllers
             await AddAssessmentArea("School characteristics", "Average Class size", null, null, schoolFinancialData, model, termYears);
 
             return model;
+        }
+
+        private string GetProgressScoreType(SchoolTrustFinancialDataObject schoolFinancialData)
+        {
+            if (schoolFinancialData.Phase == "Nursery" || schoolFinancialData.Phase == "Infant and junior")
+            {
+                return null;
+            }
+
+            if (schoolFinancialData.Phase == "Special" || schoolFinancialData.Phase == "Pupil referral unit")
+            {
+                if (schoolFinancialData.Progress8Measure == null && schoolFinancialData.Ks2Progress == null)
+                {
+                    return null;
+                }
+            }
+
+            if(schoolFinancialData.OverallPhase == "All-through")
+            {
+                return "All-through";
+            }
+
+            return schoolFinancialData.OverallPhase == "Secondary" ? "Progress 8 score" : "KS2 score";
         }
 
         private async Task AddAssessmentArea(string areaType, string areaName, decimal? schoolData, decimal? totalForAreaType, SchoolTrustFinancialDataObject schoolFinancialData, SelfAssesmentModel model, string termYears)
