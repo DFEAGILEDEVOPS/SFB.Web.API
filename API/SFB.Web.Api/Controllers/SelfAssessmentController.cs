@@ -115,15 +115,27 @@ namespace SFB.Web.Api.Controllers
         {
             if (schoolFinancialData.Phase == "Nursery" || schoolFinancialData.Phase == "Infant and junior")
             {
+                if(schoolFinancialData.Ks2Progress != null)
+                {
+                    return "KS2 score";
+                }
+                
                 return null;
             }
 
             if (schoolFinancialData.Phase == "Special" || schoolFinancialData.Phase == "Pupil referral unit")
             {
-                if (schoolFinancialData.Progress8Measure == null && schoolFinancialData.Ks2Progress == null)
+                if (schoolFinancialData.Progress8Measure != null)
                 {
-                    return null;
+                    return "Progress 8 score";
                 }
+                
+                if (schoolFinancialData.Ks2Progress != null)
+                {
+                    return "KS2 score";
+                }
+
+                return null;
             }
 
             if(schoolFinancialData.OverallPhase == "All-through")
