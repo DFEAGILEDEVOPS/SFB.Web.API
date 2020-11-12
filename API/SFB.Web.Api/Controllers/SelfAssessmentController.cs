@@ -6,6 +6,7 @@ using SFB.Web.ApplicationCore.Models;
 using SFB.Web.ApplicationCore.Services.DataAccess;
 using System;
 using System.Collections.Generic;
+using System.Data.Services.Client;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,6 +21,7 @@ namespace SFB.Web.Api.Controllers
         private readonly IFinancialDataService _financialDataService;
         private readonly IContextDataService _contextDataService;
         private readonly ILogger _logger;
+        private readonly string[] _exclusionPhaseList;
 
         public SelfAssessmentController(
            ISelfAssesmentDashboardDataService selfAssesmentDashboardDataService, 
@@ -31,6 +33,7 @@ namespace SFB.Web.Api.Controllers
             _financialDataService = financialDataService;
             _contextDataService = contextDataService;
             _logger = logger;
+            _exclusionPhaseList = new[] { "Special", "Pupil referral unit", "Special" };
         }
 
         [HttpGet("{urn}")]
@@ -104,9 +107,18 @@ namespace SFB.Web.Api.Controllers
             await AddAssessmentArea("School characteristics", "Senior leaders as a percentage of workforce", null, null, schoolFinancialData, model, termYears); ; ;
             await AddAssessmentArea("School characteristics", "Pupil to teacher ratio", null, null, schoolFinancialData, model, termYears);
             await AddAssessmentArea("School characteristics", "Pupil to adult ratio", null, null, schoolFinancialData, model, termYears);
-            await AddAssessmentArea("School characteristics", "Teacher contact ratio (less than 1)", null, null, schoolFinancialData, model, termYears);
+
+            if (!_exclusionPhaseList.Contains(schoolFinancialData.OverallPhase))
+            {
+                await AddAssessmentArea("School characteristics", "Teacher contact ratio (less than 1)", null, null, schoolFinancialData, model, termYears);
+            }
+
             await AddAssessmentArea("School characteristics", "Predicted percentage pupil number change in 3-5 years", null, null, schoolFinancialData, model, termYears);
-            await AddAssessmentArea("School characteristics", "Average Class size", null, null, schoolFinancialData, model, termYears);
+
+            if (!_exclusionPhaseList.Contains(schoolFinancialData.OverallPhase))
+            {
+                await AddAssessmentArea("School characteristics", "Average Class size", null, null, schoolFinancialData, model, termYears);
+            }
 
             return model;
         }
