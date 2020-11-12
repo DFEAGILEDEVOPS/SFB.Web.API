@@ -33,7 +33,7 @@ namespace SFB.Web.Api.Controllers
             _financialDataService = financialDataService;
             _contextDataService = contextDataService;
             _logger = logger;
-            _exclusionPhaseList = new[] { "Special", "Pupil referral unit", "Special" };
+            _exclusionPhaseList = new[] { "Nursery", "Pupil referral unit", "Special" };
         }
 
         [HttpGet("{urn}")]
