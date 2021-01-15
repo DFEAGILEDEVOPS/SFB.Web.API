@@ -46,7 +46,7 @@ namespace SFB.Web.Api.Controllers
                 var schoolContextData = await _contextDataService.GetSchoolDataObjectByUrnAsync(urn);
                 var financeType = (EstablishmentType)Enum.Parse(typeof(EstablishmentType), schoolContextData.FinanceType);
 
-                selfAssesmentModel = await BuildSelfAssesmentModel(urn, financeType, schoolContextData.OfstedRating, schoolContextData.OfstedLastInsp);
+                selfAssesmentModel = await BuildSelfAssesmentModel(urn, schoolContextData.EstablishmentName, financeType, schoolContextData.OfstedRating, schoolContextData.OfstedLastInsp);
             //}
             //catch (Exception ex)
             //{
@@ -56,14 +56,14 @@ namespace SFB.Web.Api.Controllers
             return selfAssesmentModel;
         }
 
-        private async Task<SelfAssesmentModel> BuildSelfAssesmentModel(int urn, EstablishmentType financeType, string ofstedRating, string ofstedLastInsp)
+        private async Task<SelfAssesmentModel> BuildSelfAssesmentModel(int urn, string schoolName, EstablishmentType financeType, string ofstedRating, string ofstedLastInsp)
         {
             string termYears = await GetTermYears(financeType);
             var schoolFinancialData = await _financialDataService.GetSchoolFinancialDataObjectAsync(urn, financeType, CentralFinancingType.Include);
             var progressScoreType = GetProgressScoreType(schoolFinancialData);
             var model = new SelfAssesmentModel(
                 urn,
-                schoolFinancialData.SchoolName,
+                schoolName,
                 schoolFinancialData.OverallPhase,
                 financeType.ToString(),
                 schoolFinancialData.LondonWeight,
