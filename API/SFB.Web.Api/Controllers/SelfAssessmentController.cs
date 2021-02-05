@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SFB.Web.ApplicationCore.Entities;
+using SFB.Web.ApplicationCore.Helpers;
 using SFB.Web.ApplicationCore.Helpers.Enums;
 using SFB.Web.ApplicationCore.Models;
 using SFB.Web.ApplicationCore.Services.DataAccess;
@@ -58,7 +59,7 @@ namespace SFB.Web.Api.Controllers
 
         private async Task<SelfAssesmentModel> BuildSelfAssesmentModel(int urn, string schoolName, EstablishmentType financeType, string ofstedRating, string ofstedLastInsp)
         {
-            string termYears = await GetTermYears(financeType);
+            string termYears = await GetLatestTermYears(financeType);
             var schoolFinancialData = await _financialDataService.GetSchoolFinancialDataObjectAsync(urn, financeType, CentralFinancingType.Include);
             var progressScoreType = GetProgressScoreType(schoolFinancialData);
             var model = new SelfAssesmentModel(
@@ -88,6 +89,8 @@ namespace SFB.Web.Api.Controllers
             model.SadSizeLookup = await _selfAssesmentDashboardDataService.GetSADSizeLookupDataObject(schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.NoPupils.GetValueOrDefault(), termYears);
 
             model.SadFSMLookup = await _selfAssesmentDashboardDataService.GetSADFSMLookupDataObject(schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.PercentageFSM.GetValueOrDefault(), termYears);
+
+            model.AvailableScenarioTerms = await GetAllAvailableTermYears();
 
             model.SadAssesmentAreas = new List<SadAssesmentAreaModel>();
 
@@ -165,11 +168,22 @@ namespace SFB.Web.Api.Controllers
             model.SadAssesmentAreas.Add(new SadAssesmentAreaModel(areaType, areaName, schoolData, totalForAreaType, ratings));
         }
 
-        private async Task<string> GetTermYears(EstablishmentType financeType)
+        private async Task<string> GetLatestTermYears(EstablishmentType financeType)
         {
             var term = await _financialDataService.GetLatestDataYearPerEstabTypeAsync(financeType);
-            var termYears = $"{term - 1}/{term}";
-            return termYears;
+            return SchoolFormatHelpers.FinancialTermFormatAcademies(term).Replace(" ", "");            
+        }
+
+        private async Task<List<string>> GetAllAvailableTermYears()
+        {
+            var latestMaintainedTerm = await _financialDataService.GetLatestDataYearPerEstabTypeAsync(EstablishmentType.Maintained);
+            var availableTermYears = new List<string>();
+            for (int term = latestMaintainedTerm -1; term <= latestMaintainedTerm + 3; term++)
+            {
+                availableTermYears.Add(SchoolFormatHelpers.FinancialTermFormatAcademies(term).Replace(" ",""));
+            }
+
+            return availableTermYears;
         }
     }
 }
