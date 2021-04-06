@@ -27,7 +27,7 @@ namespace SFB.Web.Api.Controllers
 
         // GET api/efficiencymetric/138082
         [HttpGet("{urn}")]
-        public async Task<ActionResult<EfficiencyMetricParentModel>> GetAsync(int urn)
+        public async Task<ActionResult<EfficiencyMetricParentModel>> GetAsync(int urn) 
         {            
             EfficiencyMetricParentDataObject defaultSchoolEMData = null;
 
