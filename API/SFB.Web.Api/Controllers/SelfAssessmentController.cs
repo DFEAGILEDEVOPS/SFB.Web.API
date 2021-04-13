@@ -7,7 +7,6 @@ using SFB.Web.ApplicationCore.Models;
 using SFB.Web.ApplicationCore.Services.DataAccess;
 using System;
 using System.Collections.Generic;
-using System.Data.Services.Client;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -40,31 +39,40 @@ namespace SFB.Web.Api.Controllers
         [HttpGet("{urn}")]
         public async Task<ActionResult<SelfAssesmentModel>> GetAsync(int urn)
         {
-            SelfAssesmentModel selfAssesmentModel = null;
 
             //try
             //{
-                var schoolContextData = await _contextDataService.GetSchoolDataObjectByUrnAsync(urn);
-                var financeType = (EstablishmentType)Enum.Parse(typeof(EstablishmentType), schoolContextData.FinanceType);
 
-                selfAssesmentModel = await BuildSelfAssesmentModel(urn, schoolContextData.EstablishmentName, financeType, schoolContextData.OfstedRating, schoolContextData.OfstedLastInsp);
+            var schoolContextData = await _contextDataService.GetSchoolDataObjectByUrnAsync(urn);
+            EstablishmentType financeType;
+            if (schoolContextData.IsFederation)
+            {
+                var selfAssesmentModel = await BuildSelfAssesmentModel(urn, schoolContextData.FederationName, EstablishmentType.Federation, null, null);
+                return selfAssesmentModel;
+            }
+            else
+            {
+                financeType = (EstablishmentType)Enum.Parse(typeof(EstablishmentType), schoolContextData.FinanceType);
+                var selfAssesmentModel = await BuildSelfAssesmentModel(urn, schoolContextData.EstablishmentName, financeType, schoolContextData.OfstedRating, schoolContextData.OfstedLastInsp);
+                return selfAssesmentModel;
+            }
+
             //}
             //catch (Exception ex)
             //{
             //    _logger.LogError(ex.Message);
             //}
 
-            return selfAssesmentModel;
         }
 
-        private async Task<SelfAssesmentModel> BuildSelfAssesmentModel(int urn, string schoolName, EstablishmentType financeType, string ofstedRating, string ofstedLastInsp)
+        private async Task<SelfAssesmentModel> BuildSelfAssesmentModel(int id, string name, EstablishmentType financeType, string ofstedRating, string ofstedLastInsp)
         {
             string termYears = await GetLatestTermYears(financeType);
-            var schoolFinancialData = await _financialDataService.GetSchoolFinancialDataObjectAsync(urn, financeType, CentralFinancingType.Include);
+            var schoolFinancialData = await _financialDataService.GetSchoolFinancialDataObjectAsync(id, financeType, CentralFinancingType.Include);
             var progressScoreType = GetProgressScoreType(schoolFinancialData);
             var model = new SelfAssesmentModel(
-                urn,
-                schoolName,
+                id,
+                name,
                 schoolFinancialData.OverallPhase,
                 financeType.ToString(),
                 schoolFinancialData.LondonWeight,
