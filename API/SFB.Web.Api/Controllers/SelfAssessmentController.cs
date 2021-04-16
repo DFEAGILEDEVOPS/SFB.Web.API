@@ -59,7 +59,7 @@ namespace SFB.Web.Api.Controllers
 
         private async Task<SelfAssesmentModel> BuildSelfAssesmentModel(int urn, string schoolName, EstablishmentType financeType, string ofstedRating, string ofstedLastInsp)
         {
-            string termYears = await GetLatestTermYears(financeType);
+            string termYears = await GetLatestTermYears(financeType); 
             var schoolFinancialData = await _financialDataService.GetSchoolFinancialDataObjectAsync(urn, financeType, CentralFinancingType.Include);
             var progressScoreType = GetProgressScoreType(schoolFinancialData);
             var model = new SelfAssesmentModel(
