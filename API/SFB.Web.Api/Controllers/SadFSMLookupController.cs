@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using SFB.Web.ApplicationCore.Entities;
 using SFB.Web.ApplicationCore.Services.DataAccess;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 namespace SFB.Web.Api.Controllers
@@ -24,14 +25,15 @@ namespace SFB.Web.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<List<SADFSMLookupDataObject>>> GetAsync()
         {
-            //try
-            //{
-            return await _selfAssesmentDashboardDataService.GetSADFSMLookups();
-            //}
-            //catch (Exception ex)
-            //{
-            //    _logger.LogError(ex.Message);
-            //}
+            try
+            {
+                return await _selfAssesmentDashboardDataService.GetSADFSMLookups();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return NoContent();
+            }
         }
     }
 }

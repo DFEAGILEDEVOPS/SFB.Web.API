@@ -40,28 +40,28 @@ namespace SFB.Web.Api.Controllers
         public async Task<ActionResult<SelfAssesmentModel>> GetAsync(int urn)
         {
 
-            //try
-            //{
-
-            var schoolContextData = await _contextDataService.GetSchoolDataObjectByUrnAsync(urn);
-            EstablishmentType financeType;
-            if (schoolContextData.IsFederation)
+            try
             {
-                var selfAssesmentModel = await BuildSelfAssesmentModel(urn, schoolContextData.FederationName, EstablishmentType.Federation, null, null);
-                return selfAssesmentModel;
-            }
-            else
-            {
-                financeType = (EstablishmentType)Enum.Parse(typeof(EstablishmentType), schoolContextData.FinanceType);
-                var selfAssesmentModel = await BuildSelfAssesmentModel(urn, schoolContextData.EstablishmentName, financeType, schoolContextData.OfstedRating, schoolContextData.OfstedLastInsp);
-                return selfAssesmentModel;
-            }
+                var schoolContextData = await _contextDataService.GetSchoolDataObjectByUrnAsync(urn);
+                EstablishmentType financeType;
+                if (schoolContextData.IsFederation)
+                {
+                    var selfAssesmentModel = await BuildSelfAssesmentModel(urn, schoolContextData.FederationName, EstablishmentType.Federation, null, null);
+                    return selfAssesmentModel;
+                }
+                else
+                {
+                    financeType = (EstablishmentType)Enum.Parse(typeof(EstablishmentType), schoolContextData.FinanceType);
+                    var selfAssesmentModel = await BuildSelfAssesmentModel(urn, schoolContextData.EstablishmentName, financeType, schoolContextData.OfstedRating, schoolContextData.OfstedLastInsp);
+                    return selfAssesmentModel;
+                }
 
-            //}
-            //catch (Exception ex)
-            //{
-            //    _logger.LogError(ex.Message);
-            //}
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return NoContent();
+            }
 
         }
 
