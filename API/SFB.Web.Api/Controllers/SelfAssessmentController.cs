@@ -37,7 +37,7 @@ namespace SFB.Web.Api.Controllers
         }
 
         [HttpGet("{urn}")]
-        public async Task<ActionResult<SelfAssesmentModel>> GetAsync(int urn)
+        public async Task<ActionResult<SelfAssesmentModel>> GetAsync(long urn)
         {
 
             try
@@ -65,7 +65,7 @@ namespace SFB.Web.Api.Controllers
 
         }
 
-        private async Task<SelfAssesmentModel> BuildSelfAssesmentModel(int id, string name, EstablishmentType financeType, string ofstedRating, string ofstedLastInsp)
+        private async Task<SelfAssesmentModel> BuildSelfAssesmentModel(long id, string name, EstablishmentType financeType, string ofstedRating, string ofstedLastInsp)
         {
             string termYears = await GetLatestTermYears(financeType);
             var schoolFinancialData = await _financialDataService.GetSchoolFinancialDataObjectAsync(id, financeType, CentralFinancingType.Include);
