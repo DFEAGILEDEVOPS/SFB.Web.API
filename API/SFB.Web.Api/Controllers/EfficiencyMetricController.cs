@@ -27,33 +27,23 @@ namespace SFB.Web.Api.Controllers
 
         // GET api/efficiencymetric/138082
         [HttpGet("{urn}")]
-        public async Task<ActionResult<EfficiencyMetricParentModel>> GetAsync(int urn) 
-        {            
-            EfficiencyMetricParentDataObject defaultSchoolEMData = null;
-
+        public async Task<ActionResult<EfficiencyMetricParentModel>> GetAsync(long urn)
+        {           
             try
             {
-                defaultSchoolEMData = await _efficiencyMetricDataService.GetSchoolDataObjectByUrnAsync(urn);
+                var defaultSchoolEMData = await _efficiencyMetricDataService.GetSchoolDataObjectByUrnAsync(urn);
+                return new EfficiencyMetricParentModel(defaultSchoolEMData);
             }
             catch(Exception ex)
             {
-                _logger.LogError(ex.Message);
-            }
-
-            if (defaultSchoolEMData == null)
-            {
-                _logger.LogWarning("No school found with URN: {urn}", urn);
+                _logger.LogError(ex.Message); 
                 return NoContent();
-            }
-            else
-            {
-                return new EfficiencyMetricParentModel(defaultSchoolEMData);
             }
         }
 
         // HEAD api/efficiencymetric/138082
         [HttpHead("{urn}")]
-        public async Task<StatusCodeResult> HeadAsync(int urn)
+        public async Task<StatusCodeResult> HeadAsync(long urn)
         {
             try
             {

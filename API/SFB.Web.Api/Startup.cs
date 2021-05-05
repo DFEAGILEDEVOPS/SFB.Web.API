@@ -5,6 +5,7 @@ using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using SFB.Web.ApplicationCore.DataAccess;
 using SFB.Web.ApplicationCore.Services.DataAccess;
 using SFB.Web.Infrastructure.Helpers;
@@ -32,6 +33,7 @@ namespace SFB.Web.Api
             string emCollectionId = Configuration.GetValue<string>("Secrets:emCollection");
             string sadCollectionId = Configuration.GetValue<string>("Secrets:sadCollection");
             string enableAiTelemetry = Configuration.GetValue<string>("ApplicationInsights:enabled");
+            string aiKey = Configuration.GetValue<string>("ApplicationInsights:InstrumentationKey");
 
             var cosmosClient = new CosmosClientBuilder(endPoint, authKey)
                                 .WithConnectionModeDirect()
@@ -49,6 +51,11 @@ namespace SFB.Web.Api
             services.AddSingleton<IEfficiencyMetricRepository>(container => new CosmosDBEfficiencyMetricRepository(cosmosClient, databaseId, emCollectionId, container.GetRequiredService<ILogManager>()));
             services.AddSingleton<ISelfAssesmentDashboardRepository>(container => new CosmosDBSelfAssesmentDashboardRepository(cosmosClient, databaseId, sadCollectionId, container.GetRequiredService<ILogManager>()));
             services.AddSingleton<IDataCollectionManager>(dataCollectionManager);
+
+            services.AddLogging(builder =>
+            {
+                builder.AddApplicationInsights(aiKey);
+            });
 
             services.AddApplicationInsightsTelemetry();
             
@@ -71,6 +78,7 @@ namespace SFB.Web.Api
             });
 
             //services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
