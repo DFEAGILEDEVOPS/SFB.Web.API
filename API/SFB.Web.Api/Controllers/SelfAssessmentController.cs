@@ -42,17 +42,18 @@ namespace SFB.Web.Api.Controllers
 
             try
             {
-                var schoolContextData = await _contextDataService.GetSchoolDataObjectByUrnAsync(urn);
-                EstablishmentType financeType;
+                var schoolContextData = await _contextDataService.GetSchoolDataObjectByUrnAsync(urn); 
+                var financeType = (EstablishmentType)Enum.Parse(typeof(EstablishmentType), schoolContextData.FinanceType);
+                var schoolFinancialData = await _financialDataService.GetSchoolFinancialDataObjectAsync(urn, financeType, CentralFinancingType.Include);
+
                 if (schoolContextData.IsFederation)
                 {
-                    var selfAssesmentModel = await BuildSelfAssesmentModel(urn, schoolContextData.FederationName, EstablishmentType.Federation, null, null);
+                    var selfAssesmentModel = await BuildSelfAssesmentModel(urn, schoolContextData.FederationName, financeType, schoolContextData, schoolFinancialData);
                     return selfAssesmentModel;
                 }
                 else
                 {
-                    financeType = (EstablishmentType)Enum.Parse(typeof(EstablishmentType), schoolContextData.FinanceType);
-                    var selfAssesmentModel = await BuildSelfAssesmentModel(urn, schoolContextData.EstablishmentName, financeType, schoolContextData.OfstedRating, schoolContextData.OfstedLastInsp);
+                    var selfAssesmentModel = await BuildSelfAssesmentModel(urn, schoolContextData.EstablishmentName, financeType, schoolContextData, schoolFinancialData);
                     return selfAssesmentModel;
                 }
 
@@ -65,73 +66,91 @@ namespace SFB.Web.Api.Controllers
 
         }
 
-        private async Task<SelfAssesmentModel> BuildSelfAssesmentModel(long id, string name, EstablishmentType financeType, string ofstedRating, string ofstedLastInsp)
+        private async Task<SelfAssesmentModel> BuildSelfAssesmentModel(long id, string name, EstablishmentType financeType, EdubaseDataObject schoolContextData, SchoolTrustFinancialDataObject schoolFinancialData)
         {
             string termYears = await GetLatestTermYears(financeType);
-            var schoolFinancialData = await _financialDataService.GetSchoolFinancialDataObjectAsync(id, financeType, CentralFinancingType.Include);
-            var progressScoreType = GetProgressScoreType(schoolFinancialData);
-            var model = new SelfAssesmentModel(
-                id,
-                name,
-                schoolFinancialData.OverallPhase,
-                financeType.ToString(),
-                schoolFinancialData.LondonWeight,
-                schoolFinancialData.NoPupils.GetValueOrDefault(),
-                schoolFinancialData.PercentageFSM.GetValueOrDefault(),
-                ofstedRating,
-                ofstedLastInsp == null ? (DateTime?)null : DateTime.ParseExact(ofstedLastInsp, "dd/MM/yyyy", CultureInfo.InvariantCulture),
-                schoolFinancialData.Progress8Measure,
-                schoolFinancialData.Ks2Progress,
-                progressScoreType,
-                schoolFinancialData.Progress8Banding.GetValueOrDefault(),
-                bool.Parse(schoolFinancialData.Has6Form),
-                schoolFinancialData.TotalExpenditure.GetValueOrDefault(),
-                schoolFinancialData.TotalIncome.GetValueOrDefault(),
-                termYears,
-                schoolFinancialData.TeachersTotal.GetValueOrDefault(),
-                schoolFinancialData.TeachersLeader.GetValueOrDefault(),
-                schoolFinancialData.WorkforceTotal.GetValueOrDefault(),
-                schoolFinancialData.PeriodCoveredByReturn >= 12
+ 
+            SelfAssesmentModel model;
+            if (schoolFinancialData != null)
+            {
+                model = new SelfAssesmentModel(
+                       id,
+                       name,
+                       schoolFinancialData.OverallPhase,
+                       financeType.ToString(),
+                       schoolFinancialData.LondonWeight,
+                       schoolFinancialData.NoPupils.GetValueOrDefault(),
+                       schoolFinancialData.PercentageFSM.GetValueOrDefault(),
+                       schoolContextData.OfstedRating,
+                       schoolContextData.OfstedLastInsp == null ? (DateTime?)null : DateTime.ParseExact(schoolContextData.OfstedLastInsp, "dd/MM/yyyy", CultureInfo.InvariantCulture),
+                       schoolFinancialData.Progress8Measure,
+                       schoolFinancialData.Ks2Progress,
+                       GetProgressScoreType(schoolFinancialData),
+                       schoolFinancialData.Progress8Banding.GetValueOrDefault(),
+                       bool.Parse(schoolFinancialData.Has6Form),
+                       schoolFinancialData.TotalExpenditure.GetValueOrDefault(),
+                       schoolFinancialData.TotalIncome.GetValueOrDefault(),
+                       termYears,
+                       schoolFinancialData.TeachersTotal.GetValueOrDefault(),
+                       schoolFinancialData.TeachersLeader.GetValueOrDefault(),
+                       schoolFinancialData.WorkforceTotal.GetValueOrDefault(),
+                       schoolFinancialData.PeriodCoveredByReturn >= 12,
+                       true
                 );
 
-            model.SadSizeLookup = await _selfAssesmentDashboardDataService.GetSADSizeLookupDataObject(schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.NoPupils.GetValueOrDefault(), termYears);
+                model.SadSizeLookup = await _selfAssesmentDashboardDataService.GetSADSizeLookupDataObject(schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.NoPupils.GetValueOrDefault(), termYears);
 
-            model.SadFSMLookup = await _selfAssesmentDashboardDataService.GetSADFSMLookupDataObject(schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.PercentageFSM.GetValueOrDefault(), termYears);
+                model.SadFSMLookup = await _selfAssesmentDashboardDataService.GetSADFSMLookupDataObject(schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.PercentageFSM.GetValueOrDefault(), termYears);
 
-            model.AvailableScenarioTerms = await GetAllAvailableTermYears();
+                model.AvailableScenarioTerms = await GetAllAvailableTermYears();
+            }
+            else
+            {
+                model = new SelfAssesmentModel(id, name, schoolContextData.OverallPhase, financeType.ToString(), schoolContextData.OfstedRating,
+                    schoolContextData.OfstedLastInsp == null ? (DateTime?)null : DateTime.ParseExact(schoolContextData.OfstedLastInsp, "dd/MM/yyyy", CultureInfo.InvariantCulture),
+                    schoolContextData.GovernmentOfficeRegion == "London" ? "Inner, Outer" : "Neither",
+                    schoolContextData.OfficialSixthForm == "Has a sixth form"); ;
 
+                model.AvailableScenarioTerms = await GetAllAvailableTermYears();
+            }
+
+            await AddAssessmentAreasToModel(termYears, schoolFinancialData, schoolContextData, model);
+
+            return model;
+        }
+
+        private async Task AddAssessmentAreasToModel(string termYears, SchoolTrustFinancialDataObject schoolFinancialData, EdubaseDataObject schoolContextData, SelfAssesmentModel model)
+        {
             model.SadAssesmentAreas = new List<SadAssesmentAreaModel>();
 
-            await AddAssessmentArea("Spending", "Teaching staff", schoolFinancialData.TeachingStaff.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            await AddAssessmentArea("Spending", "Supply staff", schoolFinancialData.SupplyStaff.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            await AddAssessmentArea("Spending", "Education support staff", schoolFinancialData.EducationSupportStaff.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            await AddAssessmentArea("Spending", "Administrative and clerical staff", schoolFinancialData.AdministrativeClericalStaff.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            await AddAssessmentArea("Spending", "Other staff costs", schoolFinancialData.OtherStaffCosts.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            await AddAssessmentArea("Spending", "Premises costs", schoolFinancialData.Premises.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            await AddAssessmentArea("Spending", "Educational supplies", schoolFinancialData.EducationalSupplies.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            await AddAssessmentArea("Spending", "Energy", schoolFinancialData.Energy.GetValueOrDefault(), schoolFinancialData.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Spending", "Teaching staff", schoolFinancialData?.TeachingStaff.GetValueOrDefault(), schoolFinancialData?.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Spending", "Supply staff", schoolFinancialData?.SupplyStaff.GetValueOrDefault(), schoolFinancialData?.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Spending", "Education support staff", schoolFinancialData?.EducationSupportStaff.GetValueOrDefault(), schoolFinancialData?.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Spending", "Administrative and clerical staff", schoolFinancialData?.AdministrativeClericalStaff.GetValueOrDefault(), schoolFinancialData?.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Spending", "Other staff costs", schoolFinancialData?.OtherStaffCosts.GetValueOrDefault(), schoolFinancialData?.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Spending", "Premises costs", schoolFinancialData?.Premises.GetValueOrDefault(), schoolFinancialData?.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Spending", "Educational supplies", schoolFinancialData?.EducationalSupplies.GetValueOrDefault(), schoolFinancialData?.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Spending", "Energy", schoolFinancialData?.Energy.GetValueOrDefault(), schoolFinancialData?.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
 
-            await AddAssessmentArea("Reserve and balance", "In-year balance", schoolFinancialData.InYearBalance.GetValueOrDefault(), schoolFinancialData.TotalIncome.GetValueOrDefault(), schoolFinancialData, model, termYears);
-            await AddAssessmentArea("Reserve and balance", "Revenue reserve", schoolFinancialData.RevenueReserve.GetValueOrDefault(), schoolFinancialData.TotalIncome.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Reserve and balance", "In-year balance", schoolFinancialData?.InYearBalance.GetValueOrDefault(), schoolFinancialData?.TotalIncome.GetValueOrDefault(), schoolFinancialData, model, termYears);
+            await AddAssessmentArea("Reserve and balance", "Revenue reserve", schoolFinancialData?.RevenueReserve.GetValueOrDefault(), schoolFinancialData?.TotalIncome.GetValueOrDefault(), schoolFinancialData, model, termYears);
 
             await AddAssessmentArea("School characteristics", "Average teacher cost", null, null, schoolFinancialData, model, termYears);
             await AddAssessmentArea("School characteristics", "Senior leaders as a percentage of workforce", null, null, schoolFinancialData, model, termYears); ; ;
             await AddAssessmentArea("School characteristics", "Pupil to teacher ratio", null, null, schoolFinancialData, model, termYears);
             await AddAssessmentArea("School characteristics", "Pupil to adult ratio", null, null, schoolFinancialData, model, termYears);
 
-            if (!_exclusionPhaseList.Contains(schoolFinancialData.OverallPhase))
+            if (!_exclusionPhaseList.Contains(schoolFinancialData?.OverallPhase ?? schoolContextData.OverallPhase))
             {
                 await AddAssessmentArea("School characteristics", "Teacher contact ratio (less than 1)", null, null, schoolFinancialData, model, termYears);
             }
 
             await AddAssessmentArea("School characteristics", "Predicted percentage pupil number change in 3-5 years", null, null, schoolFinancialData, model, termYears);
 
-            if (!_exclusionPhaseList.Contains(schoolFinancialData.OverallPhase))
+            if (!_exclusionPhaseList.Contains(schoolFinancialData?.OverallPhase ?? schoolContextData.OverallPhase))
             {
                 await AddAssessmentArea("School characteristics", "Average Class size", null, null, schoolFinancialData, model, termYears);
             }
-
-            return model;
         }
 
         private string GetProgressScoreType(SchoolTrustFinancialDataObject schoolFinancialData)
@@ -171,7 +190,7 @@ namespace SFB.Web.Api.Controllers
 
         private async Task AddAssessmentArea(string areaType, string areaName, decimal? schoolData, decimal? totalForAreaType, SchoolTrustFinancialDataObject schoolFinancialData, SelfAssesmentModel model, string termYears)
         {            
-            List<SADSchoolRatingsDataObject> ratings = await _selfAssesmentDashboardDataService.GetSADSchoolRatingsDataObjectAsync(areaName, schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.LondonWeight, model.SadSizeLookup?.SizeType, model.SadFSMLookup?.FSMScale, termYears);
+            List<SADSchoolRatingsDataObject> ratings = await _selfAssesmentDashboardDataService.GetSADSchoolRatingsDataObjectAsync(areaName, schoolFinancialData?.OverallPhase, bool.Parse(schoolFinancialData?.Has6Form ?? "false"), schoolFinancialData?.LondonWeight, model.SadSizeLookup?.SizeType, model.SadFSMLookup?.FSMScale, termYears);
             ratings = ratings.OrderBy(t => t.ScoreLow).ToList();
             model.SadAssesmentAreas.Add(new SadAssesmentAreaModel(areaType, areaName, schoolData, totalForAreaType, ratings));
         }
