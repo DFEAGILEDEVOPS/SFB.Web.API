@@ -82,7 +82,7 @@ namespace SFB.Web.Api.Controllers
                        schoolFinancialData.NoPupils.GetValueOrDefault(),
                        schoolFinancialData.PercentageFSM.GetValueOrDefault(),
                        schoolContextData.OfstedRating,
-                       schoolContextData.OfstedLastInsp == null ? (DateTime?)null : DateTime.ParseExact(schoolContextData.OfstedLastInsp, "dd/MM/yyyy", CultureInfo.InvariantCulture),
+                       FormatOfstedDate(schoolContextData.OfstedLastInsp),
                        schoolFinancialData.Progress8Measure,
                        schoolFinancialData.Ks2Progress,
                        GetProgressScoreType(schoolFinancialData),
@@ -107,9 +107,9 @@ namespace SFB.Web.Api.Controllers
             else
             {
                 model = new SelfAssesmentModel(id, name, schoolContextData.OverallPhase, financeType.ToString(), schoolContextData.OfstedRating,
-                    schoolContextData.OfstedLastInsp == null ? (DateTime?)null : DateTime.ParseExact(schoolContextData.OfstedLastInsp, "dd/MM/yyyy", CultureInfo.InvariantCulture),
-                    schoolContextData.GovernmentOfficeRegion == "London" ? "Inner, Outer" : "Neither",
-                    schoolContextData.OfficialSixthForm == "Has a sixth form"); ;
+                    FormatOfstedDate(schoolContextData.OfstedLastInsp),
+                    schoolContextData.GovernmentOfficeRegion,
+                    schoolContextData.OfficialSixthForm);
 
                 model.AvailableScenarioTerms = await GetAllAvailableTermYears();
             }
@@ -117,6 +117,11 @@ namespace SFB.Web.Api.Controllers
             await AddAssessmentAreasToModel(termYears, schoolFinancialData, schoolContextData, model);
 
             return model;
+        }
+
+        private static DateTime? FormatOfstedDate(string ofstedDate)
+        {
+            return ofstedDate == null ? (DateTime?) null : DateTime.ParseExact(ofstedDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
         }
 
         private async Task AddAssessmentAreasToModel(string termYears, SchoolTrustFinancialDataObject schoolFinancialData, EdubaseDataObject schoolContextData, SelfAssesmentModel model)
