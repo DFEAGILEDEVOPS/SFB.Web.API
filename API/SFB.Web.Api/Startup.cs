@@ -14,7 +14,7 @@ using SFB.Web.Infrastructure.Repositories;
 using System;
 
 namespace SFB.Web.Api
-{
+{ 
     public class Startup
     {
         public Startup(IConfiguration configuration)
