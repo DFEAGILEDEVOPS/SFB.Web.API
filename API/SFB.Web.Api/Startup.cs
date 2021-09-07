@@ -32,6 +32,8 @@ namespace SFB.Web.Api
             string databaseId = Configuration.GetValue<string>("Secrets:database");
             string emCollectionId = Configuration.GetValue<string>("Secrets:emCollection");
             string sadCollectionId = Configuration.GetValue<string>("Secrets:sadCollection");
+            string sadSizeLookupCollectionId = Configuration.GetValue<string>("Secrets:sadSizeLookupCollection");
+            string sadFSMLookupCollectionId = Configuration.GetValue<string>("Secrets:sadFSMLookupCollection");            
             string enableAiTelemetry = Configuration.GetValue<string>("ApplicationInsights:enabled");
             string aiKey = Configuration.GetValue<string>("ApplicationInsights:InstrumentationKey");
 
@@ -49,7 +51,7 @@ namespace SFB.Web.Api
             services.AddSingleton<IFinancialDataRepository>(container => new CosmosDbFinancialDataRepository(dataCollectionManager, cosmosClient, databaseId, container.GetRequiredService<ILogManager>()));
             services.AddSingleton<IEdubaseRepository>(container => new CosmosDbEdubaseRepository(dataCollectionManager, cosmosClient, databaseId, container.GetRequiredService<ILogManager>()));
             services.AddSingleton<IEfficiencyMetricRepository>(container => new CosmosDBEfficiencyMetricRepository(cosmosClient, databaseId, emCollectionId, container.GetRequiredService<ILogManager>()));
-            services.AddSingleton<ISelfAssesmentDashboardRepository>(container => new CosmosDBSelfAssesmentDashboardRepository(cosmosClient, databaseId, sadCollectionId, container.GetRequiredService<ILogManager>()));
+            services.AddSingleton<ISelfAssesmentDashboardRepository>(container => new CosmosDBSelfAssesmentDashboardRepository(cosmosClient, databaseId, sadCollectionId, sadSizeLookupCollectionId, sadFSMLookupCollectionId, container.GetRequiredService<ILogManager>()));
             services.AddSingleton<IDataCollectionManager>(dataCollectionManager);
 
             services.AddLogging(builder =>
