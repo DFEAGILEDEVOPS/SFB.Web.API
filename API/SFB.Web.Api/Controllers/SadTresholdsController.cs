@@ -32,6 +32,6 @@ namespace SFB.Web.Api.Controllers
             ratings = ratings.OrderBy(t => t.ScoreLow).ToList();
 
             return ratings; 
-        }
+        } 
     }
 }
