@@ -121,7 +121,14 @@ namespace SFB.Web.Api.Controllers
 
         private static DateTime? FormatOfstedDate(string ofstedDate)
         {
-            return ofstedDate == null ? (DateTime?) null : DateTime.ParseExact(ofstedDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+            try
+            {
+                return DateTime.ParseExact(ofstedDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private async Task AddAssessmentAreasToModel(string termYears, SchoolTrustFinancialDataObject schoolFinancialData, EdubaseDataObject schoolContextData, SelfAssesmentModel model)
