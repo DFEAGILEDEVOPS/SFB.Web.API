@@ -7,7 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SFB.Web.ApplicationCore.DataAccess;
+using SFB.Web.ApplicationCore.Services;
 using SFB.Web.ApplicationCore.Services.DataAccess;
+using SFB.Web.Infrastructure.Caching;
 using SFB.Web.Infrastructure.Helpers;
 using SFB.Web.Infrastructure.Logging;
 using SFB.Web.Infrastructure.Repositories;
@@ -32,6 +34,7 @@ namespace SFB.Web.Api
             string databaseId = Configuration.GetValue<string>("Secrets:database");
             string emCollectionId = Configuration.GetValue<string>("Secrets:emCollection");
             string sadCollectionId = Configuration.GetValue<string>("Secrets:sadCollection");
+            string redisConnectionString = Configuration.GetValue<string>("Secrets:redisConnectionString");
             string sadSizeLookupCollectionId = Configuration.GetValue<string>("Secrets:sadSizeLookupCollection");
             string sadFSMLookupCollectionId = Configuration.GetValue<string>("Secrets:sadFSMLookupCollection");            
             string enableAiTelemetry = Configuration.GetValue<string>("ApplicationInsights:enabled");
@@ -47,6 +50,7 @@ namespace SFB.Web.Api
             services.AddSingleton<IEfficiencyMetricDataService, EfficiencyMetricDataService>();
             services.AddSingleton<ISelfAssesmentDashboardDataService, SelfAssesmentDashboardDataService>();
             services.AddSingleton<IContextDataService, ContextDataService>();
+            services.AddSingleton<IActiveEstablishmentsService>(container => new RedisCachedActiveEstablishmentIdsService(container.GetRequiredService<IContextDataService>(), container.GetRequiredService<IFinancialDataService>(), redisConnectionString));
             services.AddSingleton<IFinancialDataService, FinancialDataService>();
             services.AddSingleton<IFinancialDataRepository>(container => new CosmosDbFinancialDataRepository(dataCollectionManager, cosmosClient, databaseId, container.GetRequiredService<ILogManager>()));
             services.AddSingleton<IEdubaseRepository>(container => new CosmosDbEdubaseRepository(dataCollectionManager, cosmosClient, databaseId, container.GetRequiredService<ILogManager>()));
