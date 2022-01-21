@@ -71,7 +71,7 @@ namespace SFB.Web.Api.Controllers
             string termYears = await GetLatestTermYears(financeType); 
  
             SelfAssesmentModel model;
-            if (schoolFinancialData != null)
+            if (schoolFinancialData is not null)
             {
                 model = new SelfAssesmentModel(
                        id,
@@ -133,7 +133,7 @@ namespace SFB.Web.Api.Controllers
 
         private async Task AddAssessmentAreasToModel(string termYears, SchoolTrustFinancialDataObject schoolFinancialData, EdubaseDataObject schoolContextData, SelfAssesmentModel model)
         {
-            model.SadAssesmentAreas = new List<SadAssesmentAreaModel>();
+            model.SadAssesmentAreas = new(); //C#9
 
             await AddAssessmentArea("Spending", "Teaching staff", schoolFinancialData?.TeachingStaff.GetValueOrDefault(), schoolFinancialData?.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
             await AddAssessmentArea("Spending", "Supply staff", schoolFinancialData?.SupplyStaff.GetValueOrDefault(), schoolFinancialData?.TotalExpenditure.GetValueOrDefault(), schoolFinancialData, model, termYears);
@@ -167,9 +167,9 @@ namespace SFB.Web.Api.Controllers
 
         private string GetProgressScoreType(SchoolTrustFinancialDataObject schoolFinancialData)
         {
-            if (schoolFinancialData.Phase == "Nursery" || schoolFinancialData.Phase == "Infant and junior")
+            if (schoolFinancialData.Phase is "Nursery" or "Infant and junior")//C#9
             {
-                if(schoolFinancialData.Ks2Progress != null)
+                if(schoolFinancialData.Ks2Progress is not null)//C#9
                 {
                     return "KS2 score";
                 }
@@ -177,14 +177,14 @@ namespace SFB.Web.Api.Controllers
                 return null;
             }
 
-            if (schoolFinancialData.Phase == "Special" || schoolFinancialData.Phase == "Pupil referral unit")
+            if (schoolFinancialData.Phase is "Special" or "Pupil referral unit")
             {
-                if (schoolFinancialData.Progress8Measure != null)
+                if (schoolFinancialData.Progress8Measure is not null)
                 {
                     return "Progress 8 score";
                 }
                 
-                if (schoolFinancialData.Ks2Progress != null)
+                if (schoolFinancialData.Ks2Progress is not null)
                 {
                     return "KS2 score";
                 }
@@ -192,7 +192,7 @@ namespace SFB.Web.Api.Controllers
                 return null;
             }
 
-            if(schoolFinancialData.OverallPhase == "All-through")
+            if(schoolFinancialData.OverallPhase is "All-through")
             {
                 return "All-through";
             }
@@ -216,7 +216,7 @@ namespace SFB.Web.Api.Controllers
         private async Task<List<string>> GetAllAvailableTermYears()
         {
             var latestMaintainedTerm = await _financialDataService.GetLatestDataYearPerEstabTypeAsync(EstablishmentType.Maintained);
-            var availableTermYears = new List<string>();
+            List<string> availableTermYears = new(); //C#9
             for (int term = latestMaintainedTerm -1; term <= latestMaintainedTerm + 3; term++)
             {
                 availableTermYears.Add(SchoolFormatHelpers.FinancialTermFormatAcademies(term).Replace(" ",""));
