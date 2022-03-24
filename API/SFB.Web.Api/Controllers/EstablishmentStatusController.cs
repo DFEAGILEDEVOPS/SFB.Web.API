@@ -72,7 +72,7 @@ namespace SFB.Web.Api.Controllers
             catch
             {
                 return StatusCode(500);
-            }
+            } 
         }
     }
 }
