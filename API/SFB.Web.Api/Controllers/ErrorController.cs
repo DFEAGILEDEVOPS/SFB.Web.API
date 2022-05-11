@@ -12,7 +12,7 @@ namespace SFB.Web.Api.Controllers
     public class ErrorController : ControllerBase
     {
         [Route("/error")]
-        public IActionResult Error()
+        public IActionResult Error() 
         {
             return Problem();
         }
