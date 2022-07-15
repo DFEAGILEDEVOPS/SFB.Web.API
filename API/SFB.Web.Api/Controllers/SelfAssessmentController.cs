@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using SFB.Web.Api.Models;
 
 namespace SFB.Web.Api.Controllers
 {
@@ -34,6 +35,45 @@ namespace SFB.Web.Api.Controllers
             _contextDataService = contextDataService;
             _logger = logger;
             _exclusionPhaseList = new[] { "Nursery", "Pupil referral unit", "Special" };
+        }
+
+        [HttpGet("trust/{uid}")]
+        public async Task<ActionResult<TrustSelfAssessmentModel>> GetTrustAsync(int uid)
+        {
+            var trustFinance =
+                await _financialDataService.GetTrustFinancialDataObjectByUidAsync(uid, await LatestMatTermAsync());
+            var academies = (await _contextDataService.GetAcademiesByUidAsync(uid)).ToList();
+
+            var result = new List<SelfAssesmentModel>();
+            
+            foreach (var establishment in academies)
+            {
+                var urn = establishment.URN;
+                var schoolContextData = await _contextDataService.GetSchoolDataObjectByUrnAsync(urn); 
+                var financeType = (EstablishmentType)Enum.Parse(typeof(EstablishmentType), schoolContextData.FinanceType);
+                var schoolFinancialData = await _financialDataService.GetSchoolFinancialDataObjectAsync(urn, financeType, CentralFinancingType.Include);
+
+                if (schoolContextData.IsFederation)
+                {
+                    var selfAssessmentModel = await BuildSelfAssesmentModel(urn, schoolContextData.FederationName, financeType, schoolContextData, schoolFinancialData);
+                    result.Add(selfAssessmentModel);
+                }
+                else
+                {
+                    var selfAssessmentModel = await BuildSelfAssesmentModel(urn, schoolContextData.EstablishmentName, financeType, schoolContextData, schoolFinancialData);
+                    result.Add(selfAssessmentModel);
+                }
+            }
+
+            var model = new TrustSelfAssessmentModel
+            {
+                TrustName = trustFinance.IsFederation ? trustFinance.FederationName : trustFinance.TrustOrCompanyName,
+                Uid = uid,
+                CompanyNumber = trustFinance.CompanyNumber,
+                Academies = result
+            };
+            
+            return model;
         }
 
         [HttpGet("{urn}")]
@@ -223,6 +263,11 @@ namespace SFB.Web.Api.Controllers
             }
 
             return availableTermYears;
+        }
+        private async Task<string> LatestMatTermAsync()
+        {
+            var latestYear = await _financialDataService.GetLatestDataYearPerEstabTypeAsync(EstablishmentType.MAT);
+            return SchoolFormatHelpers.FinancialTermFormatAcademies(latestYear);
         }
     }
 }
