@@ -42,7 +42,7 @@ namespace SFB.Web.Api.Controllers
         {
             var trustFinance =
                 await _financialDataService.GetTrustFinancialDataObjectByUidAsync(uid, await LatestMatTermAsync());
-            var academies = (await _contextDataService.GetAcademiesByUidAsync(uid)).ToList();
+            var academies = (await _contextDataService.GetAcademiesByUidAsync(uid)).OrderBy(x => x.EstablishmentName).ToList();
 
             var result = new List<SelfAssesmentModel>();
             
