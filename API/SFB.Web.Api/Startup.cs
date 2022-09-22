@@ -14,6 +14,7 @@ using SFB.Web.Infrastructure.Helpers;
 using SFB.Web.Infrastructure.Logging;
 using SFB.Web.Infrastructure.Repositories;
 using System;
+using StackExchange.Redis;
 
 namespace SFB.Web.Api
 { 
@@ -57,6 +58,8 @@ namespace SFB.Web.Api
             services.AddSingleton<IEfficiencyMetricRepository>(container => new CosmosDBEfficiencyMetricRepository(cosmosClient, databaseId, emCollectionId, container.GetRequiredService<ILogManager>()));
             services.AddSingleton<ISelfAssesmentDashboardRepository>(container => new CosmosDBSelfAssesmentDashboardRepository(cosmosClient, databaseId, sadCollectionId, sadSizeLookupCollectionId, sadFSMLookupCollectionId, container.GetRequiredService<ILogManager>()));
             services.AddSingleton<IDataCollectionManager>(dataCollectionManager);
+            var multiplexer = ConnectionMultiplexer.Connect(redisConnectionString);
+            services.AddSingleton<IConnectionMultiplexer>(multiplexer);
 
             services.AddLogging(builder =>
             {

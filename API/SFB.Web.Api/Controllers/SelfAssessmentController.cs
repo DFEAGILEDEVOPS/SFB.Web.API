@@ -11,6 +11,8 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using SFB.Web.Api.Models;
+using StackExchange.Redis;
+using Newtonsoft.Json;
 
 namespace SFB.Web.Api.Controllers
 {
@@ -23,50 +25,79 @@ namespace SFB.Web.Api.Controllers
         private readonly IContextDataService _contextDataService;
         private readonly ILogger _logger;
         private readonly string[] _exclusionPhaseList;
+        private readonly IConnectionMultiplexer _redis;
 
         public SelfAssessmentController(
            ISelfAssesmentDashboardDataService selfAssesmentDashboardDataService, 
            IFinancialDataService financialDataService,
            IContextDataService contextDataService,
-           ILogger<SelfAssessmentController> logger)
+           ILogger<SelfAssessmentController> logger,
+           IConnectionMultiplexer redis)
         {
             _selfAssesmentDashboardDataService = selfAssesmentDashboardDataService;
             _financialDataService = financialDataService;
             _contextDataService = contextDataService;
             _logger = logger;
+            _redis = redis;
             _exclusionPhaseList = new[] { "Nursery", "Pupil referral unit", "Special" };
         }
 
         [HttpGet("trust/{uid}")]
         public async Task<ActionResult<TrustSelfAssessmentModel>> GetTrustAsync(int uid)
         {
+            var db = _redis.GetDatabase();
             var trustFinance =
                 await _financialDataService.GetTrustFinancialDataObjectByUidAsync(uid, await LatestMatTermAsync());
             var academies = (await _contextDataService.GetAcademiesByUidAsync(uid))
                 .Where(x => x.OverallPhase != "16 plus")
                 .OrderBy(x => x.EstablishmentName).ToList();
 
+            var academyCount = academies.Count;
+
             var result = new List<SelfAssesmentModel>();
-            
-            foreach (var establishment in academies)
+
+            foreach (var (establishment, i) in 
+                     academies.Select((establishment, i) => (establishment, i)))
             {
                 var urn = establishment.URN;
-                var schoolContextData = await _contextDataService.GetSchoolDataObjectByUrnAsync(urn); 
-                var financeType = (EstablishmentType)Enum.Parse(typeof(EstablishmentType), schoolContextData.FinanceType);
-                var schoolFinancialData = await _financialDataService.GetSchoolFinancialDataObjectAsync(urn, financeType, CentralFinancingType.Include);
-
-                if (schoolContextData.IsFederation)
+                var dbKey = $"establishmentSad-{urn}";
+                var cachedResult = await db.StringGetAsync(dbKey);
+                if (cachedResult.IsNull)
                 {
-                    var selfAssessmentModel = await BuildSelfAssesmentModel(urn, schoolContextData.FederationName, financeType, schoolContextData, schoolFinancialData);
+                    var schoolContextData = await _contextDataService.GetSchoolDataObjectByUrnAsync(urn);
+                    var financeType =
+                        (EstablishmentType)Enum.Parse(typeof(EstablishmentType), schoolContextData.FinanceType);
+                    var schoolFinancialData =
+                        await _financialDataService.GetSchoolFinancialDataObjectAsync(urn, financeType,
+                            CentralFinancingType.Include);
+
+                    var establishmentName = schoolContextData.IsFederation
+                        ? schoolContextData.FederationName
+                        : schoolContextData.EstablishmentName;
+
+                    var selfAssessmentModel = await BuildSelfAssesmentModel(urn,
+                        establishmentName,
+                        financeType, schoolContextData, schoolFinancialData);
+                    
                     result.Add(selfAssessmentModel);
+                    
+                    if (i < 7)
+                    {
+                        await db.StringSetAsync(dbKey, JsonConvert.SerializeObject(selfAssessmentModel),
+                            TimeSpan.FromHours(1));
+                    }
+                    else // larger mat so cache results for longer
+                    {
+                        await db.StringSetAsync(dbKey, JsonConvert.SerializeObject(selfAssessmentModel));
+                    }
                 }
                 else
                 {
-                    var selfAssessmentModel = await BuildSelfAssesmentModel(urn, schoolContextData.EstablishmentName, financeType, schoolContextData, schoolFinancialData);
-                    result.Add(selfAssessmentModel);
+                    result.Add(JsonConvert.DeserializeObject<SelfAssesmentModel>(cachedResult));
                 }
             }
-
+                
+           
             var model = new TrustSelfAssessmentModel
             {
                 TrustName = trustFinance.IsFederation ? trustFinance.FederationName : trustFinance.TrustOrCompanyName,
@@ -81,23 +112,33 @@ namespace SFB.Web.Api.Controllers
         [HttpGet("{urn}")]
         public async Task<ActionResult<SelfAssesmentModel>> GetAsync(long urn)
         {
+            var db = _redis.GetDatabase();
+            var dbKey = $"establishmentSad-{urn}";
+            var cachedResult = await db.StringGetAsync(dbKey);
 
+            if (!cachedResult.IsNull)
+            {
+                return JsonConvert.DeserializeObject<SelfAssesmentModel>(cachedResult);
+            }
+            
             try
             {
                 var schoolContextData = await _contextDataService.GetSchoolDataObjectByUrnAsync(urn); 
                 var financeType = (EstablishmentType)Enum.Parse(typeof(EstablishmentType), schoolContextData.FinanceType);
                 var schoolFinancialData = await _financialDataService.GetSchoolFinancialDataObjectAsync(urn, financeType, CentralFinancingType.Include);
 
-                if (schoolContextData.IsFederation)
-                {
-                    var selfAssesmentModel = await BuildSelfAssesmentModel(urn, schoolContextData.FederationName, financeType, schoolContextData, schoolFinancialData);
-                    return selfAssesmentModel;
-                }
-                else
-                {
-                    var selfAssesmentModel = await BuildSelfAssesmentModel(urn, schoolContextData.EstablishmentName, financeType, schoolContextData, schoolFinancialData);
-                    return selfAssesmentModel;
-                }
+                var establishmentName = schoolContextData.IsFederation
+                    ? schoolContextData.FederationName
+                    : schoolContextData.EstablishmentName;
+
+                var selfAssessmentModel = await BuildSelfAssesmentModel(urn,
+                    establishmentName,
+                    financeType, schoolContextData, schoolFinancialData);
+                
+                await db.StringSetAsync(dbKey, JsonConvert.SerializeObject(selfAssessmentModel),
+                    TimeSpan.FromHours(1));
+
+                return selfAssessmentModel;
 
             }
             catch (Exception ex)
