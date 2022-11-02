@@ -185,7 +185,7 @@ namespace SFB.Web.Api.Controllers
 
                 model.SadFSMLookup = await _selfAssesmentDashboardDataService.GetSADFSMLookupDataObject(schoolFinancialData.OverallPhase, bool.Parse(schoolFinancialData.Has6Form), schoolFinancialData.PercentageFSM.GetValueOrDefault(), termYears);
 
-                model.AvailableScenarioTerms = await GetAllAvailableTermYears();
+                model.AvailableScenarioTerms = await GetAllAvailableTermYears(financeType);
             }
             else
             {
@@ -194,7 +194,7 @@ namespace SFB.Web.Api.Controllers
                     schoolContextData.GovernmentOfficeRegion,
                     schoolContextData.OfficialSixthForm);
 
-                model.AvailableScenarioTerms = await GetAllAvailableTermYears();
+                model.AvailableScenarioTerms = await GetAllAvailableTermYears(financeType);
             }
 
             await AddAssessmentAreasToModel(termYears, schoolFinancialData, schoolContextData, model);
@@ -296,9 +296,9 @@ namespace SFB.Web.Api.Controllers
             return SchoolFormatHelpers.FinancialTermFormatAcademies(term).Replace(" ", "");            
         }
 
-        private async Task<List<string>> GetAllAvailableTermYears()
+        private async Task<List<string>> GetAllAvailableTermYears(EstablishmentType establishmentType = EstablishmentType.Maintained)
         {
-            var latestMaintainedTerm = await _financialDataService.GetLatestDataYearPerEstabTypeAsync(EstablishmentType.Maintained);
+            var latestMaintainedTerm = await _financialDataService.GetLatestDataYearPerEstabTypeAsync(establishmentType);
             List<string> availableTermYears = new(); //C#9
             for (int term = latestMaintainedTerm -1; term <= latestMaintainedTerm + 3; term++)
             {
