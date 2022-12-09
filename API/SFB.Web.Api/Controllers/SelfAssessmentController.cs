@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Azure.Cosmos.Linq;
 using SFB.Web.Api.Models;
 using StackExchange.Redis;
 using Newtonsoft.Json;
@@ -41,8 +42,9 @@ namespace SFB.Web.Api.Controllers
             _redis = redis;
             _exclusionPhaseList = new[] { "Nursery", "Pupil referral unit", "Special" };
         }
-
-        [HttpGet("trust/{uid}")]
+        
+        
+        [HttpGet("trustold/{uid}")]
         public async Task<ActionResult<TrustSelfAssessmentModel>> GetTrustAsync(int uid)
         {
             var db = _redis.GetDatabase();
@@ -106,6 +108,131 @@ namespace SFB.Web.Api.Controllers
                 Academies = result
             };
             
+            return model;
+        }
+
+        [HttpGet("trust/{uid}")]
+        public async Task<ActionResult<TrustSelfAssessmentModel>> GetTrustDataAsync(int uid)
+        {
+            var latestTerm = await LatestMatTermAsync();
+            var db = _redis.GetDatabase();
+            var trustAcademies = (await _contextDataService.GetAcademiesByUidAsync(uid))
+                .Where(x => x.OverallPhase != "16 plus").ToList();
+
+            var trustFinance = await _financialDataService.GetTrustFinancialDataObjectByUidAsync(uid, latestTerm);
+            var academyUrns = trustAcademies.Select(x => x.URN).ToList();
+            var redisKeys = academyUrns.Select(x => (RedisKey)$"establishmentSad-{x}").ToArray();
+            var cachedData = await db.StringGetAsync(redisKeys);
+
+            var model = new TrustSelfAssessmentModel
+            {
+                TrustName = trustFinance.IsFederation ? trustFinance.FederationName : trustFinance.TrustOrCompanyName,
+                Uid = uid,
+                CompanyNumber = trustFinance.CompanyNumber,
+            };
+
+            try
+            {
+                var result = new List<SelfAssesmentModel>();
+
+                foreach (var redisValue in cachedData)
+                {
+                    if (redisValue.IsNull) continue;
+                    var res = JsonConvert.DeserializeObject<SelfAssesmentModel>(redisValue);
+                    academyUrns.RemoveAll(x => x == res?.Urn);
+                    result.Add(res);
+                }
+
+                // build SA models for establishments not found in the cache
+                if (academyUrns.Count > 0)
+                {
+                    var academyData = (await _contextDataService.GetMultipleSchoolDataObjectsByUrnsAsync(academyUrns))
+                        .Where(x => x.OverallPhase != "16 plus").ToList();
+                    var academyFinancials =
+                        await _financialDataService.GetTrustSchoolsFinancialDataAsync(uid, latestTerm);
+
+                    var sadFsmLookUps = await _selfAssesmentDashboardDataService.GetSADFSMLookups();
+                    var sadSizeLookups = await _selfAssesmentDashboardDataService.GetSADSizeLookups();
+                    var academyLatestTermYear = await GetLatestTermYears(EstablishmentType.Academies);
+                    var academyScenarioTerms = await GetAllAvailableTermYears(EstablishmentType.Academies);
+                    foreach (var (academy, i) in academyData.Select((academy, i) => (academy, i)))
+                    {
+                        var urn = academy.URN;
+                        var dbKey = $"establishmentSad-{urn}";
+                        var establishmentName =
+                            academy.IsFederation ? academy.FederationName : academy.EstablishmentName;
+                        var financeType = (EstablishmentType)Enum.Parse(typeof(EstablishmentType), academy.FinanceType);
+                        var schoolFinancialData = academyFinancials.First(x => x.URN == urn);
+
+                        var selfAssessmentModel = new SelfAssesmentModel(
+                            urn,
+                            establishmentName,
+                            schoolFinancialData.OverallPhase,
+                            financeType.ToString(),
+                            schoolFinancialData.LondonWeight,
+                            schoolFinancialData.NoPupils.GetValueOrDefault(),
+                            schoolFinancialData.PercentageFSM.GetValueOrDefault(),
+                            academy.OfstedRating,
+                            FormatOfstedDate(academy.OfstedLastInsp),
+                            schoolFinancialData.Progress8Measure,
+                            schoolFinancialData.Ks2Progress,
+                            GetProgressScoreType(schoolFinancialData),
+                            schoolFinancialData.Progress8Banding.GetValueOrDefault(),
+                            bool.Parse(schoolFinancialData.Has6Form),
+                            schoolFinancialData.TotalExpenditure.GetValueOrDefault(),
+                            schoolFinancialData.TotalIncome.GetValueOrDefault(),
+                            academyLatestTermYear,
+                            schoolFinancialData.TeachersTotal.GetValueOrDefault(),
+                            schoolFinancialData.TeachersLeader.GetValueOrDefault(),
+                            schoolFinancialData.WorkforceTotal.GetValueOrDefault(),
+                            schoolFinancialData.PeriodCoveredByReturn >= 12,
+                            true
+                        );
+
+                        var pupilCount = schoolFinancialData.NoPupils.GetValueOrDefault();
+                        var fsmPercent = schoolFinancialData.PercentageFSM.GetValueOrDefault();
+                        var has6Form = bool.Parse(schoolFinancialData.Has6Form);
+
+                        selfAssessmentModel.SadSizeLookup = sadSizeLookups.Find(x =>
+                            x.OverallPhase == schoolFinancialData.OverallPhase &&
+                            x.HasSixthForm == has6Form &&
+                            x.NoPupilsMin <= pupilCount && (x.NoPupilsMax == null || x.NoPupilsMax >= pupilCount) &&
+                            x.Term == academyLatestTermYear);
+                        
+                        selfAssessmentModel.SadFSMLookup = sadFsmLookUps.Find(x =>
+                            x.OverallPhase == schoolFinancialData.OverallPhase &&
+                            x.HasSixthForm == has6Form &&
+                            x.FSMMin <= fsmPercent && x.FSMMax >= fsmPercent &&
+                            x.Term == academyLatestTermYear);
+
+
+                        selfAssessmentModel.AvailableScenarioTerms = academyScenarioTerms;
+
+                        await AddAssessmentAreasToModel(academyLatestTermYear, schoolFinancialData, academy,
+                            selfAssessmentModel);
+
+                        result.Add(selfAssessmentModel);
+
+                        if (i < 7)
+                        {
+                            await db.StringSetAsync(dbKey, JsonConvert.SerializeObject(selfAssessmentModel),
+                                TimeSpan.FromHours(1));
+                        }
+                        else
+                        {
+                            await db.StringSetAsync(dbKey, JsonConvert.SerializeObject(selfAssessmentModel));
+                        }
+                    }
+                }
+
+                model.Academies = result.OrderBy(x => x.Name).ToList();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return NoContent();
+            }
+
             return model;
         }
 
