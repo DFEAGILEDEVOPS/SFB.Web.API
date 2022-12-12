@@ -159,14 +159,12 @@ namespace SFB.Web.Api.Controllers
                     {
                         var urn = academy.URN;
                         var dbKey = $"establishmentSad-{urn}";
-                        var establishmentName =
-                            academy.IsFederation ? academy.FederationName : academy.EstablishmentName;
-                        var financeType = (EstablishmentType)Enum.Parse(typeof(EstablishmentType), academy.FinanceType);
+                        var establishmentName = academy.IsFederation ?
+                            academy.FederationName :
+                            academy.EstablishmentName;
                         
-                        var schoolFinancialData = academyFinancials.FirstOrDefault(x => x.URN == urn) ??
-                                                  await _financialDataService.GetSchoolFinancialDataObjectAsync(urn,
-                                                      financeType,
-                                                      CentralFinancingType.Include);
+                        var financeType = (EstablishmentType)Enum.Parse(typeof(EstablishmentType), academy.FinanceType);
+                        var schoolFinancialData = academyFinancials.FirstOrDefault(x => x.URN == urn);
 
                         if (schoolFinancialData is not null)
                         {
@@ -223,16 +221,15 @@ namespace SFB.Web.Api.Controllers
                         }
                         else
                         {
-                            var m = new SelfAssesmentModel(urn, establishmentName, academy.OverallPhase,
+                            result.Add(new SelfAssesmentModel(urn, establishmentName, academy.OverallPhase,
                                 financeType.ToString(),
                                 academy.OfstedRating,
                                 FormatOfstedDate(academy.OfstedLastInsp),
                                 academy.GovernmentOfficeRegion,
-                                academy.OfficialSixthForm);
-
-                            m.AvailableScenarioTerms = await GetAllAvailableTermYears(financeType);
-                            result.Add(m);
-
+                                academy.OfficialSixthForm)
+                            {
+                                AvailableScenarioTerms = await GetAllAvailableTermYears(financeType)
+                            });
                         }
                     }
                     
