@@ -235,9 +235,9 @@ namespace SFB.Web.Api.Controllers
 
                         }
                     }
-
-                    model.Academies = result.OrderBy(x => x.Name).ToList();
+                    
                 }
+                model.Academies = result.OrderBy(x => x.Name).ToList();
             }
             catch (Exception e)
             {
