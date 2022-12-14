@@ -397,8 +397,8 @@ namespace SFB.Web.Api.Controllers
                 model, termYears);
             await AddAssessmentArea("School characteristics", "Senior leaders as a percentage of workforce", null, null,
                 schoolFinancialData, model, termYears);
-            ;
-            ;
+            
+            
             await AddAssessmentArea("School characteristics", "Pupil to teacher ratio", null, null, schoolFinancialData,
                 model, termYears);
             await AddAssessmentArea("School characteristics", "Pupil to adult ratio", null, null, schoolFinancialData,
