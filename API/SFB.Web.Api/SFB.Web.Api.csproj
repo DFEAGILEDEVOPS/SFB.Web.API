@@ -9,7 +9,7 @@
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.7.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.3" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="SFB.Artifacts.ApplicationCore" Version="1.0.336.71556" />
+    <PackageReference Include="SFB.Artifacts.ApplicationCore" Version="1.0.72.73892" />
     <PackageReference Include="SFB.Artifacts.Infrastructure" Version="1.0.348.71799" />
     <PackageReference Include="StackExchange.Redis" Version="2.2.88" />
     <PackageReference Include="System.Runtime.Caching" Version="6.0.0" />
