@@ -47,6 +47,7 @@ namespace SFB.Web.Api
 
             var dataCollectionManager = new DataCollectionManager(cosmosClient, databaseId, new NetCoreCachedActiveCollectionsService());
 
+
             services.AddSingleton<ILogManager>(container => new NetCoreLogManager(enableAiTelemetry));
             services.AddSingleton<IEfficiencyMetricDataService, EfficiencyMetricDataService>();
             services.AddSingleton<ISelfAssesmentDashboardDataService, SelfAssesmentDashboardDataService>();
