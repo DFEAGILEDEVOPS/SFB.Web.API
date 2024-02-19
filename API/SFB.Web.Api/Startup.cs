@@ -15,6 +15,7 @@ using SFB.Web.Infrastructure.Logging;
 using SFB.Web.Infrastructure.Repositories;
 using System;
 using StackExchange.Redis;
+using Microsoft.Azure.Cosmos;
 
 namespace SFB.Web.Api
 { 
@@ -38,12 +39,14 @@ namespace SFB.Web.Api
             string redisConnectionString = Configuration.GetValue<string>("Secrets:redisConnectionString");
             string sadSizeLookupCollectionId = Configuration.GetValue<string>("Secrets:sadSizeLookupCollection");
             string sadFSMLookupCollectionId = Configuration.GetValue<string>("Secrets:sadFSMLookupCollection");            
+            string cosmosConnectionMode = Configuration.GetValue<string>("Secrets:cosmosConnectionMode");            
             string enableAiTelemetry = Configuration.GetValue<string>("ApplicationInsights:enabled");
             string aiKey = Configuration.GetValue<string>("ApplicationInsights:InstrumentationKey");
 
-            var cosmosClient = new CosmosClientBuilder(endPoint, authKey)
-                                .WithConnectionModeDirect()
-                                .Build();
+            var cosmosClientBuilder = new CosmosClientBuilder(endPoint, authKey);
+            var cosmosClient = cosmosConnectionMode == "Gateway"
+                ? cosmosClientBuilder.WithConnectionModeGateway().Build()
+                : cosmosClientBuilder.WithConnectionModeDirect().Build();
 
             var dataCollectionManager = new DataCollectionManager(cosmosClient, databaseId, new NetCoreCachedActiveCollectionsService());
 
