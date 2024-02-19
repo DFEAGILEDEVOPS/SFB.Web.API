@@ -17,7 +17,9 @@ Install the prerequisites:
 1. .NET 6
 1. [Docker](https://docs.docker.com/get-docker/)
 
-Right-click on project in Visual Studio and select Manage Secrets or in Rider, click Tools > Manage .NET Secrets. Populate the following in the `secrets.json` file:
+You will also need to authenticate with Azure DevOps in order to resolve packages from the private package feed.
+
+Right-click on project in Visual Studio and select Manage User Secrets or in Rider, click Tools > Manage .NET Secrets. Populate the following in the `secrets.json` file:
 
 ```json
 {
