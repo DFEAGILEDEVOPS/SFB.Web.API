@@ -82,6 +82,7 @@ namespace SFB.Web.Api
             });
 
             services.AddControllers();
+            services.AddSwaggerGen();
 
             services.AddHsts(options =>
             {
@@ -100,6 +101,8 @@ namespace SFB.Web.Api
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
             else
             {

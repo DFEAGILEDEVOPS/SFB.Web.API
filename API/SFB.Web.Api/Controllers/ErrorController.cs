@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace SFB.Web.Api.Controllers
 {
     [ApiController]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class ErrorController : ControllerBase
     {
         [Route("/error")]
