@@ -6,12 +6,13 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
-    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.7.0" />
-    <PackageReference Include="SFB.Artifacts.ApplicationCore" Version="1.2024.37.79737" />
-    <PackageReference Include="SFB.Artifacts.Infrastructure" Version="1.2024.45.79895" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.38.1" />
+    <PackageReference Include="SFB.Artifacts.ApplicationCore" Version="1.2024.72.80345" />
+    <PackageReference Include="SFB.Artifacts.Infrastructure" Version="1.2024.72.80346" />
     <PackageReference Include="StackExchange.Redis" Version="2.7.17" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.16" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="System.Runtime.Caching" Version="6.0.0" />
   </ItemGroup>
 </Project>
