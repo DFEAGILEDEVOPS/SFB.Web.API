@@ -1,6 +1,7 @@
 # About SFB.Web.API
 
-[![Build Status](https://dev.azure.com/agilefactory/Financial%20Benchmarking/_apis/build/status/SFB.Web.Api?branchName=master)](https://dev.azure.com/agilefactory/Financial%20Benchmarking/_build/latest?definitionId=453&branchName=master) ![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/DFEAGILEDEVOPS/SFB.Web.API?include_prereleases)
+[![Build Status](https://agilefactory.visualstudio.com/Financial%20Benchmarking/_apis/build/status/Service/SFB.Web.Api)](https://agilefactory.visualstudio.com/Financial%20Benchmarking/_build?definitionId=453)
+[![GitHub release (latest by date)](https://agilefactory.vsrm.visualstudio.com/_apis/public/Release/badge/fc33e3f0-e73b-466d-837a-10cad68c664e/7/22)](https://agilefactory.visualstudio.com/Financial%20Benchmarking/_release?definitionId=7)
 
 SFB Web API is the first initial implementation in providing the Department of Education's products a micro-service oriented architectural approach.
 
