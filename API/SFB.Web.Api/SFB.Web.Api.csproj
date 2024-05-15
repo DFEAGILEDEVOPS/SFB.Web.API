@@ -7,8 +7,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.38.1" />
-    <PackageReference Include="SFB.Artifacts.ApplicationCore" Version="1.2024.134.81365" />
-    <PackageReference Include="SFB.Artifacts.Infrastructure" Version="1.2024.134.81367" />
+    <PackageReference Include="SFB.Artifacts.ApplicationCore" Version="1.2024.136.81417" />
+    <PackageReference Include="SFB.Artifacts.Infrastructure" Version="1.2024.136.81428" />
     <PackageReference Include="StackExchange.Redis" Version="2.7.17" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.16" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
